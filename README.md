@@ -1,4 +1,4 @@
-# 🌱 Verdagro
+# 🌱 VerdAgro
 
 > Plataforma de inteligência ambiental e comercialização de créditos de carbono no agronegócio.
 

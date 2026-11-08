@@ -21,7 +21,7 @@ export const ESTILO_SATELITE: StyleSpecification = {
 };
 
 /** Centro inicial: cerrado goiano (região da fazenda demo). */
-export const CENTRO_INICIAL: [number, number] = [-50.958, -17.846];
+export const CENTRO_INICIAL: [number, number] = [-50.9915, -17.9545];
 
 export const CORES = {
   broto: "#c5f25c",

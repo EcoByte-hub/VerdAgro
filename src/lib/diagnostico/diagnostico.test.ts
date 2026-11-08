@@ -8,7 +8,7 @@ import { calcularIndicadores } from "./indicadores";
 import { montarMensagem, SYSTEM_PROMPT } from "./prompt";
 import { diagnosticoSchema } from "./schema";
 
-const clima = resumirClima(climaFixture, { ano: 2024, latitude: -17.846, longitude: -50.958 });
+const clima = resumirClima(climaFixture, { ano: 2024, latitude: -17.9545, longitude: -50.9915 });
 
 describe("indicadores", () => {
   it("calcula NDVI médio, pico e estação seca da série demo", () => {

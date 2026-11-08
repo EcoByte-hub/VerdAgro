@@ -19,7 +19,7 @@ export const PROPRIEDADES_DEMO: (Propriedade & { donoId: string })[] = [
     nome: FAZENDA_BOA_VISTA.nome,
     municipio: FAZENDA_BOA_VISTA.municipio,
     uf: FAZENDA_BOA_VISTA.uf,
-    areaHa: 199.39,
+    areaHa: 199.4,
     producao: FAZENDA_BOA_VISTA.producao,
     culturas: [...FAZENDA_BOA_VISTA.culturas],
     historico: FAZENDA_BOA_VISTA.historico,

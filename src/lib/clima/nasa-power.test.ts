@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import fixture from "@/lib/demo/dados/nasa-power-rio-verde-2024.json";
 import { buscarClima, resumirClima } from "./nasa-power";
 
-const ponto = { ano: 2024, latitude: -17.846, longitude: -50.958 };
+const ponto = { ano: 2024, latitude: -17.9545, longitude: -50.9915 };
 
 describe("resumirClima", () => {
   it("resume 12 meses com precipitação total em mm", () => {
@@ -38,7 +38,7 @@ describe("buscarClima", () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify(fixture)));
     vi.stubGlobal("fetch", fetchMock);
 
-    const r = await buscarClima(-17.846, -50.958, 2024);
+    const r = await buscarClima(-17.9545, -50.9915, 2024);
     const url = new URL(fetchMock.mock.calls[0][0]);
     expect(url.searchParams.get("community")).toBe("AG");
     expect(url.searchParams.get("parameters")).toContain("PRECTOTCORR");

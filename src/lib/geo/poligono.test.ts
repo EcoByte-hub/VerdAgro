@@ -11,12 +11,12 @@ describe("polígono da propriedade", () => {
 
   it("calcula o centróide em Rio Verde/GO", () => {
     const c = centroide(FAZENDA_BOA_VISTA.poligono);
-    expect(c.latitude).toBeCloseTo(-17.846, 2);
-    expect(c.longitude).toBeCloseTo(-50.958, 2);
+    expect(c.latitude).toBeCloseTo(-17.954, 2);
+    expect(c.longitude).toBeCloseTo(-50.992, 2);
   });
 
   it("gera WKT com SRID 4326", () => {
-    expect(paraWKT(FAZENDA_BOA_VISTA.poligono)).toMatch(/^SRID=4326;POLYGON\(\(-50\.965217 -17\.85058, /);
+    expect(paraWKT(FAZENDA_BOA_VISTA.poligono)).toMatch(/^SRID=4326;POLYGON\(\(-50\.998726 -17\.959067, /);
   });
 
   it("aceita um polígono válido", () => {

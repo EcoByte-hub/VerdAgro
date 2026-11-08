@@ -7,5 +7,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Ignora arquivos estáticos e imagens
-  matcher: ["/((?!_next/static|_next/image|icon.svg|apple-icon.png|maplibre-gl-worker.mjs|.*\\.(?:svg|png|jpg|jpeg|webp)$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|icon.svg|apple-icon.png|maplibre-gl-worker.mjs|.*\\.(?:svg|png|jpg|jpeg|webp)$).*)",
+  ],
 };

@@ -2,6 +2,7 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { USUARIOS_DEMO } from "@/lib/demo/usuarios";
 import { integrations } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
@@ -17,6 +18,9 @@ export type Sessao = {
 
 /** Usuário logado (ou null). Em modo demonstração, lê o papel escolhido no cookie. */
 export async function obterSessao(): Promise<Sessao | null> {
+  // A sessão é sempre por requisição (a SDK do Supabase usa Date.now() para o token)
+  await connection();
+
   if (!integrations.supabase) {
     const papel = (await cookies()).get(COOKIE_DEMO)?.value as Papel | undefined;
     if (!papel || !(papel in USUARIOS_DEMO)) return null;

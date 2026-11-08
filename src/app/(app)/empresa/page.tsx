@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { Carregando } from "@/components/app/carregando";
 import Link from "next/link";
 import { Store } from "lucide-react";
 import { Cabecalho } from "@/components/app/cabecalho";
@@ -13,7 +15,7 @@ import { formatNumber } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Painel da empresa" };
 
-export default async function PainelEmpresa() {
+async function Conteudo() {
   const sessao = await exigirPapel("empresa");
   const [projetos, interesses] = await Promise.all([listarMarketplace(sessao), listarInteresses(sessao)]);
 
@@ -73,5 +75,13 @@ export default async function PainelEmpresa() {
         </div>
       </section>
     </>
+  );
+}
+
+export default function PainelEmpresa() {
+  return (
+    <Suspense fallback={<Carregando />}>
+      <Conteudo />
+    </Suspense>
   );
 }

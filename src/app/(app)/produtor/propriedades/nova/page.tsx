@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { Carregando } from "@/components/app/carregando";
 import { Cabecalho } from "@/components/app/cabecalho";
 import { FormPropriedade } from "@/components/propriedade/form-propriedade";
 import { exigirPapel } from "@/lib/auth/sessao";
 
 export const metadata: Metadata = { title: "Nova propriedade" };
 
-export default async function NovaPropriedadePage() {
+async function Conteudo() {
   await exigirPapel("produtor");
   return (
     <>
@@ -16,5 +18,13 @@ export default async function NovaPropriedadePage() {
       />
       <FormPropriedade />
     </>
+  );
+}
+
+export default function NovaPropriedadePage() {
+  return (
+    <Suspense fallback={<Carregando />}>
+      <Conteudo />
+    </Suspense>
   );
 }

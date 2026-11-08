@@ -8,7 +8,9 @@ import { USUARIOS_DEMO } from "./usuarios";
  * para a Fazenda Boa Vista, mostrando o passo 7 da demo (produtor recebe o interesse).
  */
 
-const diasAtras = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString();
+// Datas fixas (Date.now() no carregamento do módulo quebra o prerender do Next)
+const REFERENCIA = Date.UTC(2026, 10, 1);
+const diasAtras = (n: number) => new Date(REFERENCIA - n * 86_400_000).toISOString();
 
 export const PROPRIEDADES_DEMO: (Propriedade & { donoId: string })[] = [
   {

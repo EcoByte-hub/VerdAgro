@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { Carregando } from "@/components/app/carregando";
 import { Cabecalho } from "@/components/app/cabecalho";
 import { Card } from "@/components/ui/card";
 import { exigirPapel } from "@/lib/auth/sessao";
@@ -6,7 +8,7 @@ import { exigirPapel } from "@/lib/auth/sessao";
 export const metadata: Metadata = { title: "Administração" };
 
 /** Painel administrativo: indicadores de sucesso do documento de concepção (issue no backlog). */
-export default async function AdminPage() {
+async function Conteudo() {
   await exigirPapel("admin");
   return (
     <>
@@ -19,5 +21,13 @@ export default async function AdminPage() {
         Em construção. Veja a issue do painel administrativo.
       </Card>
     </>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <Suspense fallback={<Carregando />}>
+      <Conteudo />
+    </Suspense>
   );
 }

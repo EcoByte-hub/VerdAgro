@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { Carregando } from "@/components/app/carregando";
 import Link from "next/link";
 import { Bell, MapPinned, Plus } from "lucide-react";
 import { Cabecalho } from "@/components/app/cabecalho";
@@ -13,7 +15,7 @@ import { ROTULO_STATUS } from "@/lib/dados/tipos";
 
 export const metadata: Metadata = { title: "Painel do produtor" };
 
-export default async function PainelProdutor() {
+async function Conteudo() {
   const sessao = await exigirPapel("produtor");
   const [propriedades, projetos, interesses] = await Promise.all([
     listarPropriedades(sessao),
@@ -98,5 +100,13 @@ export default async function PainelProdutor() {
         )}
       </section>
     </>
+  );
+}
+
+export default function PainelProdutor() {
+  return (
+    <Suspense fallback={<Carregando />}>
+      <Conteudo />
+    </Suspense>
   );
 }

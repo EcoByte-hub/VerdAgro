@@ -80,9 +80,9 @@ async function Conteudo({ params }: { params: PageProps<"/marketplace/[id]">["pa
               </p>
             ) : (
               <p className="mt-2 text-tinta">
-                Nenhum crédito emitido. Este projeto está em <strong>{infoEstagio(p.estagio).rotulo.toLowerCase()}</strong>
-                : qualquer potencial é estimativa até a verificação independente e a emissão por um registro
-                oficial.
+                Nenhum crédito emitido. Este projeto está em{" "}
+                <strong>{infoEstagio(p.estagio).rotulo.toLowerCase()}</strong>: qualquer potencial é
+                estimativa até a verificação independente e a emissão por um registro oficial.
               </p>
             )}
           </Card>

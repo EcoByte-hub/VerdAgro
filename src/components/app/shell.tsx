@@ -3,6 +3,7 @@ import { LogOut } from "lucide-react";
 import { sair } from "@/app/(auth)/actions";
 import { Logo } from "@/components/brand/logo";
 import { Tag } from "@/components/ui/tag";
+import { HOME_DO_PAPEL } from "@/lib/auth/rotas";
 import { obterSessao } from "@/lib/auth/sessao";
 import { redirect } from "next/navigation";
 import { NAV_POR_PAPEL, ROTULO_PAPEL } from "./navegacao";
@@ -16,7 +17,7 @@ export async function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
       <aside className="sticky top-0 z-30 flex shrink-0 items-center justify-between gap-4 bg-mata-900 px-4 py-3 text-palha lg:h-screen lg:w-64 lg:flex-col lg:items-stretch lg:justify-start lg:px-5 lg:py-6">
-        <Link href="/inicio" className="shrink-0">
+        <Link href={HOME_DO_PAPEL[sessao.papel]} className="shrink-0">
           <Logo variant="negative" />
         </Link>
         <div className="flex-1 lg:mt-10">

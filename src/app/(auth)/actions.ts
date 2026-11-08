@@ -21,14 +21,17 @@ export async function entrar(_: EstadoForm, formData: FormData): Promise<EstadoF
   if (!integrations.supabase) return { erro: "Supabase não configurado: use o acesso de demonstração." };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: dados.data.email,
     password: dados.data.senha,
   });
   if (error) return { erro: "E-mail ou senha incorretos." };
 
   const voltar = dados.data.voltar;
-  redirect(voltar?.startsWith("/") && !voltar.startsWith("//") ? voltar : "/inicio");
+  if (voltar?.startsWith("/") && !voltar.startsWith("//")) redirect(voltar);
+
+  const { data: perfil } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
+  redirect(perfil ? HOME_DO_PAPEL[perfil.role] : "/");
 }
 
 const cadastroSchema = z.object({
@@ -57,7 +60,7 @@ export async function cadastrar(_: EstadoForm, formData: FormData): Promise<Esta
     },
   });
   if (error) return { erro: error.message };
-  redirect("/inicio");
+  redirect(HOME_DO_PAPEL[dados.data.papel]);
 }
 
 /** MODO DEMONSTRAÇÃO: entra com um usuário fictício sem Supabase. */

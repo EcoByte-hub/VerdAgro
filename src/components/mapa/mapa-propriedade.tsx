@@ -1,7 +1,7 @@
 "use client";
 
 import "maplibre-gl/dist/maplibre-gl.css";
-import * as maplibregl from "maplibre-gl";
+import { maplibregl } from "./maplibre";
 import { useEffect, useRef } from "react";
 import type { PoligonoGeoJSON } from "@/lib/geo/poligono";
 import { CORES, ESTILO_SATELITE } from "./estilo";

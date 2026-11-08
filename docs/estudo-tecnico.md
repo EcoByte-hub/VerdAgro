@@ -145,10 +145,12 @@ Extraídos do documento de concepção e do roteiro da demo:
 
 | Spike | Pergunta | Status |
 |---|---|---|
-| NASA POWER | Conseguimos clima sem chave para um ponto? | ✅ Validado neste estudo |
-| Copernicus Statistical API | Conseguimos série mensal de NDVI para um polígono de 200 ha dentro da cota? | ⏳ Cliente implementado; falta validar com credenciais reais |
-| Claude com saída estruturada | O diagnóstico respeita o schema e os guarda-corpos? | ⏳ Módulo implementado; falta validar com chave real e avaliar respostas |
-| Terra Draw + MapLibre no React | Desenho do polígono funciona bem, inclusive no mobile? | ⏳ Componente base implementado |
+| NASA POWER | Conseguimos clima sem chave para um ponto? | ✅ Validado: chamada real usada no diagnóstico |
+| Supabase + PostGIS + RLS | Schema, área por trigger e permissões funcionam? | ✅ Validado no Supabase local (21 verificações automáticas) |
+| Terra Draw + MapLibre no React | Desenho do polígono funciona? | ✅ Validado no desktop; falta testar no celular |
+| Fluxo ponta a ponta | Login → diagnóstico → propriedade → interesse → painel | ✅ Validado contra o Supabase local |
+| Copernicus Statistical API | Série mensal de NDVI para um polígono de 200 ha dentro da cota? | ⏳ Cliente implementado e testado com mocks; falta validar com credenciais reais |
+| Claude com saída estruturada | O diagnóstico respeita o schema e os guarda-corpos? | ⏳ Módulo implementado e testado; falta validar com chave real e avaliar respostas |
 
 ## 8. Referências
 

@@ -7,12 +7,15 @@ import { Tag } from "@/components/ui/tag";
 export default function Home() {
   return (
     <main className="relative flex flex-1 flex-col overflow-hidden">
-      <div className="bg-grid pointer-events-none absolute inset-0 text-mata-900 opacity-[0.04]" aria-hidden />
+      <div
+        className="pointer-events-none absolute inset-0 bg-grid text-mata-900 opacity-[0.04]"
+        aria-hidden
+      />
       <div className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 py-10">
         <Logo />
         <div className="flex flex-1 flex-col justify-center py-16">
           <p className="eyebrow text-musgo">Plataforma · MVP</p>
-          <h1 className="font-display-soft mt-5 max-w-3xl text-5xl leading-[1.02] text-mata-900 sm:text-7xl">
+          <h1 className="mt-5 max-w-3xl font-display-soft text-5xl leading-[1.02] text-mata-900 sm:text-7xl">
             Do campo ao <em className="font-light text-musgo">crédito de carbono.</em>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-tinta-soft">

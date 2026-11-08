@@ -67,7 +67,9 @@
 
 @utility font-display-soft {
   font-family: var(--font-display);
-  font-variation-settings: "SOFT" 50, "opsz" 144;
+  font-variation-settings:
+    "SOFT" 50,
+    "opsz" 144;
   letter-spacing: -0.02em;
 }
 

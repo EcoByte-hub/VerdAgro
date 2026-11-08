@@ -18,7 +18,6 @@ const q = async (tok, path, opts = {}) => {
   const t = await r.text(); let j; try { j = JSON.parse(t) } catch { j = t }
   return { status: r.status, data: j };
 };
-const count = r => Array.isArray(r.data) ? r.data.length : `${r.status} ${JSON.stringify(r.data).slice(0, 120)}`;
 const prod = await login('produtor@demo.verdagro.app');
 const coop = await login('coop@demo.verdagro.app');
 const emp = await login('empresa@demo.verdagro.app');

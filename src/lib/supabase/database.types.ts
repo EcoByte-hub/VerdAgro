@@ -63,6 +63,13 @@ export type Database = {
             referencedRelation: "properties";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "diagnostics_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "propriedades_app";
+            referencedColumns: ["id"];
+          },
         ];
       };
       interest_messages: {
@@ -372,6 +379,13 @@ export type Database = {
             referencedRelation: "properties";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "projects_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "propriedades_app";
+            referencedColumns: ["id"];
+          },
         ];
       };
       properties: {
@@ -468,6 +482,13 @@ export type Database = {
             referencedRelation: "properties";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "property_practices_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "propriedades_app";
+            referencedColumns: ["id"];
+          },
         ];
       };
     };
@@ -493,6 +514,66 @@ export type Database = {
         };
         ComputedFields: never;
         Relationships: [];
+      };
+      propriedades_app: {
+        Row: {
+          area_ha: number;
+          city: string;
+          created_at: string;
+          crops: string[];
+          id: string;
+          is_demo: boolean;
+          land_use_history: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          name: string;
+          owner_id: string;
+          poligono: Json | null;
+          production_type: string | null;
+          state: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          area_ha?: number | null;
+          city?: string | null;
+          created_at?: string | null;
+          crops?: string[] | null;
+          id?: string | null;
+          is_demo?: boolean | null;
+          land_use_history?: string | null;
+          latitude?: never;
+          longitude?: never;
+          name?: string | null;
+          owner_id?: string | null;
+          poligono?: never;
+          production_type?: string | null;
+          state?: string | null;
+        };
+        Update: {
+          area_ha?: number | null;
+          city?: string | null;
+          created_at?: string | null;
+          crops?: string[] | null;
+          id?: string | null;
+          is_demo?: boolean | null;
+          land_use_history?: string | null;
+          latitude?: never;
+          longitude?: never;
+          name?: string | null;
+          owner_id?: string | null;
+          poligono?: never;
+          production_type?: string | null;
+          state?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "properties_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Functions: {

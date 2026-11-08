@@ -26,6 +26,8 @@ const len = r => (Array.isArray(r.data) ? r.data.length : -1);
 
 expect('produtor vê só a própria propriedade', len(await q(prod, 'properties?select=id')) === 1);
 expect('empresa não lê propriedades (nem polígonos)', len(await q(emp, 'properties?select=id')) === 0);
+expect('empresa não lê polígonos pela view do app', len(await q(emp, 'propriedades_app?select=id')) === 0);
+expect('produtor recebe o polígono em GeoJSON', (await q(prod, 'propriedades_app?select=poligono')).data?.[0]?.poligono?.type === 'Polygon');
 expect('empresa vê os 3 projetos publicados no marketplace', len(await q(emp, 'marketplace_projects?select=id')) === 3);
 expect('anônimo não lê o marketplace', len(await q(KEY, 'marketplace_projects?select=id')) <= 0);
 expect('empresa vê só as próprias negociações', len(await q(emp, 'interests?select=id')) === 1);

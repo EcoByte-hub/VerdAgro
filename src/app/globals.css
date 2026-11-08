@@ -1,26 +1,92 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ==========================================================================
+   VerdAgro · Design tokens "Terra Viva"
+   Mesma identidade da landing page (EcoByte-hub/VerdAgroLP · STYLEGUIDE.md).
+   Regra de ouro: estimativa = tracejado (cerrado) · certificado = sólido (broto)
+   ========================================================================== */
+
+@theme {
+  /* Base · Mata */
+  --color-mata-950: #08180f;
+  --color-mata-900: #0e2a1f;
+  --color-mata-800: #153828;
+  --color-mata-700: #1f4a35;
+  --color-musgo: #2e5e43;
+  --color-folha: #4f8a5b;
+
+  /* Acento · Broto (CTA e "certificado") */
+  --color-broto: #c5f25c;
+  --color-broto-300: #d9f78f;
+  --color-broto-700: #56751a;
+
+  /* Neutros quentes · Palha */
+  --color-palha-50: #faf8f2;
+  --color-palha: #f3eee2;
+  --color-areia: #e6dcc6;
+  --color-argila: #b9ab8c;
+  --color-tinta: #101814;
+  --color-tinta-soft: #44524a;
+
+  /* Semântica · Cerrado ("estimativa") */
+  --color-cerrado: #a34a26;
+  --color-cerrado-300: #e39a75;
+
+  /* Estados de sistema */
+  --color-erro: #b42318;
+  --color-alerta: #b54708;
+
+  /* Tipografia (variáveis injetadas por next/font em layout.tsx) */
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+
+  --radius-card: 1.25rem;
+  --ease-brota: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    @apply bg-palha font-sans text-tinta;
+  }
+
+  ::selection {
+    background: var(--color-broto);
+    color: var(--color-mata-900);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-broto-700);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility font-display-soft {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 50, "opsz" 144;
+  letter-spacing: -0.02em;
+}
+
+@utility eyebrow {
+  @apply inline-flex items-center gap-2 font-mono text-[11px] font-medium tracking-[0.18em] uppercase;
+}
+
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, currentColor 1px, transparent 1px),
+    linear-gradient(to bottom, currentColor 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

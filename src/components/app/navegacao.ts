@@ -9,6 +9,7 @@ export type ItemNav = {
 export const NAV_POR_PAPEL: Record<Papel, ItemNav[]> = {
   produtor: [
     { href: "/produtor", rotulo: "Painel", icone: "painel" },
+    { href: "/produtor/projetos", rotulo: "Meus projetos", icone: "projeto" },
     { href: "/produtor/propriedades/nova", rotulo: "Nova propriedade", icone: "propriedade" },
     { href: "/marketplace", rotulo: "Marketplace", icone: "loja" },
   ],

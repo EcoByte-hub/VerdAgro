@@ -84,13 +84,23 @@ async function Conteudo() {
       </section>
 
       <section aria-labelledby="projetos">
-        <h2 id="projetos" className="mb-3 text-sm font-semibold text-tinta">
-          Projetos
-        </h2>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 id="projetos" className="text-sm font-semibold text-tinta">
+            Projetos
+          </h2>
+          {projetos.length > 0 && (
+            <Link
+              href="/produtor/projetos"
+              className="text-sm font-semibold text-musgo underline-offset-4 hover:underline"
+            >
+              Gerenciar projetos
+            </Link>
+          )}
+        </div>
         {projetos.length ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {projetos.map((p) => (
-              <CardProjeto key={p.id} projeto={p} href={`/marketplace/${p.id}`} />
+              <CardProjeto key={p.id} projeto={p} href={`/produtor/projetos/${p.id}`} mostrarPublicacao />
             ))}
           </div>
         ) : (

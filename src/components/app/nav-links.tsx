@@ -18,7 +18,10 @@ const ICONES = {
 export function NavLinks({ itens }: { itens: ItemNav[] }) {
   const pathname = usePathname();
   return (
-    <nav className="flex gap-1 lg:flex-col" aria-label="Navegação da plataforma">
+    <nav
+      className="flex justify-around gap-1 sm:justify-start lg:flex-col"
+      aria-label="Navegação da plataforma"
+    >
       {itens.map((item) => {
         const Icone = ICONES[item.icone];
         const ativo =
@@ -34,8 +37,9 @@ export function NavLinks({ itens }: { itens: ItemNav[] }) {
               ativo ? "bg-broto text-mata-900" : "text-palha/70 hover:bg-palha/10 hover:text-palha",
             )}
           >
-            <Icone size={18} />
-            <span className="hidden sm:inline">{item.rotulo}</span>
+            <Icone size={18} aria-hidden />
+            {/* sr-only (e não hidden): no celular o ícone aparece sozinho, mas o leitor de tela ainda lê o nome */}
+            <span className="sr-only sm:not-sr-only">{item.rotulo}</span>
           </Link>
         );
       })}

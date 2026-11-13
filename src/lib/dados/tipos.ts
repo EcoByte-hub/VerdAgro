@@ -66,6 +66,43 @@ export type ProjetoDetalhe = ProjetoResumo & {
   linhaDoTempo: EventoLinhaDoTempo[];
 };
 
+export const ROTULO_DOCUMENTO: Record<string, string> = {
+  evidencia: "Evidência",
+  car: "CAR",
+  nota_fiscal: "Nota fiscal",
+  laudo: "Laudo",
+  outro: "Outro",
+};
+
+export type DocumentoProjeto = {
+  id: string;
+  nome: string;
+  tipo: string;
+  criadoEm: string;
+  /** link assinado e temporário (bucket privado); null se não foi possível gerar */
+  url: string | null;
+};
+
+/** Visão do dono: inclui o que nunca vai para o marketplace (rascunho, documentos, propriedade). */
+export type ProjetoDoProdutor = ProjetoDetalhe & {
+  fim: string | null;
+  propriedade: { id: string; nome: string; areaHa: number };
+  documentos: DocumentoProjeto[];
+};
+
+/** Campos que o produtor pode editar. Estágio e créditos não entram: dependem de verificação externa. */
+export type EdicaoProjeto = {
+  titulo: string;
+  descricao: string | null;
+  objetivo: string | null;
+  pratica: Pratica;
+  areaHa: number;
+  metodologia: string | null;
+  inicio: string | null;
+  fim: string | null;
+  infoComercial: string | null;
+};
+
 export type Interesse = {
   id: string;
   projetoId: string;

@@ -50,8 +50,9 @@ async function Resultados({ searchParams }: { searchParams: PageProps<"/marketpl
 
   return (
     <>
-      <form className="mb-8 grid gap-3 rounded-[var(--radius-card)] border border-areia bg-palha-50 p-4 sm:grid-cols-[1fr_120px_220px_auto]">
-        <label className="relative">
+      {/* Uma linha só no xl; antes disso a busca ganha a linha de cima para não ficar espremida */}
+      <form className="mb-8 grid gap-3 rounded-[var(--radius-card)] border border-areia bg-palha-50 p-4 sm:grid-cols-[160px_1fr_auto] xl:grid-cols-[1fr_160px_240px_auto]">
+        <label className="relative sm:col-span-full xl:col-span-1">
           <span className="sr-only">Buscar</span>
           <Search size={16} className="absolute top-1/2 left-3.5 -translate-y-1/2 text-argila" />
           <Input

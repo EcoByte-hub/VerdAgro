@@ -1,12 +1,21 @@
 import Link from "next/link";
 import { ArrowUpRight, MapPin } from "lucide-react";
-import { DemoTag } from "@/components/ui/tag";
+import { DemoTag, Tag } from "@/components/ui/tag";
 import { ROTULO_PRATICA } from "@/lib/diagnostico/schema";
 import type { ProjetoResumo } from "@/lib/dados/tipos";
 import { formatHectares } from "@/lib/utils";
 import { SeloEstagio } from "./selo-estagio";
 
-export function CardProjeto({ projeto, href }: { projeto: ProjetoResumo; href: string }) {
+export function CardProjeto({
+  projeto,
+  href,
+  mostrarPublicacao = false,
+}: {
+  projeto: ProjetoResumo;
+  href: string;
+  /** visão do dono: indica se o projeto está no marketplace */
+  mostrarPublicacao?: boolean;
+}) {
   return (
     <Link
       href={href}
@@ -14,6 +23,7 @@ export function CardProjeto({ projeto, href }: { projeto: ProjetoResumo; href: s
     >
       <div className="flex flex-wrap items-center gap-2">
         <SeloEstagio estagio={projeto.estagio} />
+        {mostrarPublicacao && <Tag kind="neutro">{projeto.publicado ? "Publicado" : "Não publicado"}</Tag>}
         {projeto.isDemo && <DemoTag />}
       </div>
       <h3 className="mt-4 font-display-soft text-xl text-mata-900">{projeto.titulo}</h3>

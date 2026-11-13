@@ -126,6 +126,8 @@ export function FormPropriedade() {
 }
 
 function LinhaPratica({ pratica }: { pratica: Pratica }) {
+  // Controlado para que escolher o ano marque a prática: sem a marcação o servidor descarta o ano
+  const [marcada, setMarcada] = useState(false);
   const rotulo = ROTULO_PRATICA[pratica];
 
   return (
@@ -134,12 +136,21 @@ function LinhaPratica({ pratica }: { pratica: Pratica }) {
         id={`pratica_${pratica}`}
         name={`pratica_${pratica}`}
         type="checkbox"
+        checked={marcada}
+        onChange={(e) => setMarcada(e.target.checked)}
         className="size-4 accent-[#2e5e43]"
       />
       <label htmlFor={`pratica_${pratica}`} className="flex-1 text-sm text-tinta">
         {rotulo}
       </label>
-      <SeletorAno name={`desde_${pratica}`} rotulo={`${rotulo}: ano de início`} placeholder="desde" />
+      <SeletorAno
+        name={`desde_${pratica}`}
+        rotulo={`${rotulo}: ano de início`}
+        placeholder="desde"
+        onChange={(ano) => {
+          if (ano !== null) setMarcada(true);
+        }}
+      />
     </div>
   );
 }

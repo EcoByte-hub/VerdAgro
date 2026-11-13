@@ -22,6 +22,11 @@ type Props = {
   defaultValue?: string | null;
   onChange?: (valor: string) => void;
   placeholder?: string;
+  /**
+   * Opção que volta ao valor vazio, no topo da lista (ex.: "Todas as UFs" num filtro).
+   * Some durante a busca e, escolhida, aparece no campo em tom suave.
+   */
+  opcaoVazia?: string;
   required?: boolean;
   mensagemObrigatorio?: string;
   /** mostra um campo de busca no topo da lista */
@@ -75,6 +80,7 @@ export function SeletorOpcoes({
   defaultValue = null,
   onChange,
   placeholder = "Selecione",
+  opcaoVazia,
   required = false,
   mensagemObrigatorio = "Campo obrigatório",
   buscavel = false,
@@ -98,8 +104,17 @@ export function SeletorOpcoes({
   const idOpcao = (v: string) => `${base}-op-${v}`;
   const estaAberto = aberto !== null;
 
-  const filtradas = useMemo(() => filtrar(opcoes, busca), [opcoes, busca]);
+  const filtradas = useMemo(
+    () =>
+      // Durante a busca a opção vazia sai da lista: quem digita procura um valor
+      opcaoVazia && !normalizar(busca)
+        ? [{ valor: "", rotulo: opcaoVazia }, ...opcoes]
+        : filtrar(opcoes, busca),
+    [opcoes, busca, opcaoVazia],
+  );
   const selecionada = (valor && opcoes.find((o) => o.valor === valor)) || null;
+  /** com siglas na lista, a opção vazia ganha o mesmo recuo para alinhar os nomes */
+  const temSigla = opcoes.some((o) => o.sigla);
   // O destaque sempre aponta para uma opção visível (a busca pode esconder a anterior)
   const destaque = filtradas.some((o) => o.valor === ativo) ? ativo : (filtradas[0]?.valor ?? null);
 
@@ -205,7 +220,7 @@ export function SeletorOpcoes({
         aria-controls={estaAberto ? idLista : undefined}
         // aria-invalid não vale em button: o erro é anunciado pela mensagem ligada aqui
         aria-describedby={invalido ? idErro : undefined}
-        aria-label={`${rotulo}: ${selecionada?.rotulo ?? "nenhum selecionado"}`}
+        aria-label={`${rotulo}: ${selecionada?.rotulo ?? opcaoVazia ?? "nenhum selecionado"}`}
         onClick={() => (estaAberto ? setAberto(null) : abrir())}
         onKeyDown={(e) => {
           if (estaAberto) return;
@@ -232,8 +247,8 @@ export function SeletorOpcoes({
           estaAberto && "border-musgo ring-2 ring-broto/60",
         )}
       >
-        <span className={cn("truncate", !selecionada && "text-argila")}>
-          {selecionada ? (selecionada.sigla ?? selecionada.rotulo) : placeholder}
+        <span className={cn("truncate", !selecionada && (opcaoVazia ? "text-tinta-soft" : "text-argila"))}>
+          {selecionada ? (selecionada.sigla ?? selecionada.rotulo) : (opcaoVazia ?? placeholder)}
         </span>
         <ChevronDown
           size={16}
@@ -302,11 +317,14 @@ export function SeletorOpcoes({
                 onClick={() => escolher(o)}
                 className={cn(
                   "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-sm text-tinta",
+                  o.valor === "" && "text-tinta-soft",
                   o.valor === destaque && "bg-areia/70",
                   o.valor === valor && "font-semibold",
                 )}
               >
-                {o.sigla && <span className="w-6 shrink-0 font-mono text-xs text-tinta-soft">{o.sigla}</span>}
+                {(o.sigla || temSigla) && (
+                  <span className="w-6 shrink-0 font-mono text-xs text-tinta-soft">{o.sigla}</span>
+                )}
                 <span className="flex-1 truncate">{o.rotulo}</span>
                 {o.valor === valor && <Check size={15} className="shrink-0 text-musgo" aria-hidden />}
               </li>

@@ -39,7 +39,7 @@ export async function Shell({ children }: { children: React.ReactNode }) {
               type="submit"
               className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-palha/70 hover:bg-palha/10 hover:text-palha"
             >
-              <LogOut size={16} /> <span className="hidden sm:inline">Sair</span>
+              <LogOut size={16} aria-hidden /> <span className="sr-only sm:not-sr-only">Sair</span>
             </button>
           </form>
         </div>

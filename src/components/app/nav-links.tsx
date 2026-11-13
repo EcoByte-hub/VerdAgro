@@ -37,8 +37,9 @@ export function NavLinks({ itens }: { itens: ItemNav[] }) {
               ativo ? "bg-broto text-mata-900" : "text-palha/70 hover:bg-palha/10 hover:text-palha",
             )}
           >
-            <Icone size={18} />
-            <span className="hidden sm:inline">{item.rotulo}</span>
+            <Icone size={18} aria-hidden />
+            {/* sr-only (e não hidden): no celular o ícone aparece sozinho, mas o leitor de tela ainda lê o nome */}
+            <span className="sr-only sm:not-sr-only">{item.rotulo}</span>
           </Link>
         );
       })}

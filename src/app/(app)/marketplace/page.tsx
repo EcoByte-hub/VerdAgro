@@ -4,14 +4,18 @@ import { Search } from "lucide-react";
 import { Cabecalho } from "@/components/app/cabecalho";
 import { CardProjeto } from "@/components/projeto/card-projeto";
 import { Button } from "@/components/ui/button";
-import { Input, Select } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
+import { SeletorOpcoes } from "@/components/ui/seletor-opcoes";
 import { Tag } from "@/components/ui/tag";
 import { exigirPapel } from "@/lib/auth/sessao";
 import { listarMarketplace } from "@/lib/dados";
 import type { Pratica } from "@/lib/dados/tipos";
 import { PRATICAS, ROTULO_PRATICA } from "@/lib/diagnostico/schema";
+import { OPCOES_UF } from "@/lib/geo/ufs";
 
 export const metadata: Metadata = { title: "Marketplace" };
+
+const OPCOES_PRATICA = PRATICAS.map((p) => ({ valor: p, rotulo: ROTULO_PRATICA[p] }));
 
 export default function MarketplacePage({ searchParams }: PageProps<"/marketplace">) {
   return (
@@ -62,20 +66,22 @@ async function Resultados({ searchParams }: { searchParams: PageProps<"/marketpl
             className="pl-10"
           />
         </label>
-        <Select name="uf" defaultValue={filtros.uf ?? ""} aria-label="UF">
-          <option value="">Todas UFs</option>
-          {["GO", "MT", "MS", "MG", "BA", "PR", "SP", "TO", "RS"].map((uf) => (
-            <option key={uf}>{uf}</option>
-          ))}
-        </Select>
-        <Select name="pratica" defaultValue={filtros.pratica ?? ""} aria-label="Prática">
-          <option value="">Todas as práticas</option>
-          {PRATICAS.map((p) => (
-            <option key={p} value={p}>
-              {ROTULO_PRATICA[p]}
-            </option>
-          ))}
-        </Select>
+        <SeletorOpcoes
+          name="uf"
+          rotulo="UF"
+          opcoes={OPCOES_UF}
+          defaultValue={filtros.uf}
+          opcaoVazia="Todas as UFs"
+          buscavel
+          placeholderBusca="Buscar estado"
+        />
+        <SeletorOpcoes
+          name="pratica"
+          rotulo="Prática"
+          opcoes={OPCOES_PRATICA}
+          defaultValue={filtros.pratica}
+          opcaoVazia="Todas as práticas"
+        />
         <Button type="submit" variant="dark">
           Filtrar
         </Button>

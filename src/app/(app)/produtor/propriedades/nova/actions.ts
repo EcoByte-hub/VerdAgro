@@ -6,43 +6,14 @@ import { exigirPapel } from "@/lib/auth/sessao";
 import { criarPropriedade } from "@/lib/dados";
 import { PRATICAS } from "@/lib/diagnostico/schema";
 import { paraWKT, validarPoligono } from "@/lib/geo/poligono";
+import { SIGLAS_UF } from "@/lib/geo/ufs";
 
 export type EstadoNovaPropriedade = { erro?: string } | undefined;
-
-const UFS = [
-  "AC",
-  "AL",
-  "AP",
-  "AM",
-  "BA",
-  "CE",
-  "DF",
-  "ES",
-  "GO",
-  "MA",
-  "MT",
-  "MS",
-  "MG",
-  "PA",
-  "PB",
-  "PR",
-  "PE",
-  "PI",
-  "RJ",
-  "RN",
-  "RS",
-  "RO",
-  "RR",
-  "SC",
-  "SP",
-  "SE",
-  "TO",
-] as const;
 
 const schema = z.object({
   nome: z.string().trim().min(2, "Informe o nome da propriedade"),
   municipio: z.string().trim().min(2, "Informe o município"),
-  uf: z.enum(UFS, "Escolha a UF"),
+  uf: z.enum(SIGLAS_UF, "Escolha a UF"),
   producao: z.string().trim().optional(),
   culturas: z.string().trim().optional(),
   historico: z.string().trim().max(2000).optional(),

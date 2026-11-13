@@ -4,42 +4,14 @@ import { useActionState, useState } from "react";
 import { salvarPropriedade } from "@/app/(app)/produtor/propriedades/nova/actions";
 import { DesenharPoligono } from "@/components/mapa";
 import { Button } from "@/components/ui/button";
-import { FieldError, Input, Label, Select, Textarea } from "@/components/ui/input";
+import { FieldError, Input, Label, Textarea } from "@/components/ui/input";
 import { SeletorAno } from "@/components/ui/seletor-ano";
+import { SeletorOpcoes } from "@/components/ui/seletor-opcoes";
 import type { Pratica } from "@/lib/dados/tipos";
 import { FAZENDA_BOA_VISTA } from "@/lib/demo/fazenda-boa-vista";
 import { PRATICAS, ROTULO_PRATICA } from "@/lib/diagnostico/schema";
 import type { PoligonoGeoJSON } from "@/lib/geo/poligono";
-
-const UFS = [
-  "AC",
-  "AL",
-  "AP",
-  "AM",
-  "BA",
-  "CE",
-  "DF",
-  "ES",
-  "GO",
-  "MA",
-  "MT",
-  "MS",
-  "MG",
-  "PA",
-  "PB",
-  "PR",
-  "PE",
-  "PI",
-  "RJ",
-  "RN",
-  "RS",
-  "RO",
-  "RR",
-  "SC",
-  "SP",
-  "SE",
-  "TO",
-];
+import { OPCOES_UF } from "@/lib/geo/ufs";
 
 export function FormPropriedade() {
   const [estado, acao, pendente] = useActionState(salvarPropriedade, undefined);
@@ -78,14 +50,18 @@ export function FormPropriedade() {
           </div>
           <div>
             <Label htmlFor="uf">UF</Label>
-            <Select id="uf" name="uf" required defaultValue="">
-              <option value="" disabled>
-                UF
-              </option>
-              {UFS.map((uf) => (
-                <option key={uf}>{uf}</option>
-              ))}
-            </Select>
+            <SeletorOpcoes
+              id="uf"
+              name="uf"
+              rotulo="UF"
+              opcoes={OPCOES_UF}
+              placeholder="UF"
+              required
+              mensagemObrigatorio="Escolha a UF"
+              buscavel
+              placeholderBusca="Buscar estado"
+              alinhar="fim"
+            />
           </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">

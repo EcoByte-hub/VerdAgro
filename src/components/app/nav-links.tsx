@@ -18,7 +18,10 @@ const ICONES = {
 export function NavLinks({ itens }: { itens: ItemNav[] }) {
   const pathname = usePathname();
   return (
-    <nav className="flex gap-1 lg:flex-col" aria-label="Navegação da plataforma">
+    <nav
+      className="flex justify-around gap-1 sm:justify-start lg:flex-col"
+      aria-label="Navegação da plataforma"
+    >
       {itens.map((item) => {
         const Icone = ICONES[item.icone];
         const ativo =

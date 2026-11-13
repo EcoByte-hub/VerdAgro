@@ -16,11 +16,12 @@ export async function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
-      <aside className="sticky top-0 z-30 flex shrink-0 items-center justify-between gap-4 bg-mata-900 px-4 py-3 text-palha lg:h-screen lg:w-64 lg:flex-col lg:items-stretch lg:justify-start lg:px-5 lg:py-6">
+      {/* Abaixo de lg a navegação desce para uma segunda linha: logo + 4 itens não cabem lado a lado no celular */}
+      <aside className="sticky top-0 z-30 flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 bg-mata-900 px-4 py-3 text-palha lg:h-screen lg:w-64 lg:flex-col lg:flex-nowrap lg:items-stretch lg:justify-start lg:px-5 lg:py-6">
         <Link href={HOME_DO_PAPEL[sessao.papel]} className="shrink-0">
           <Logo variant="negative" />
         </Link>
-        <div className="flex-1 lg:mt-10">
+        <div className="order-last basis-full lg:order-none lg:mt-10 lg:flex-1 lg:basis-auto">
           <NavLinks itens={NAV_POR_PAPEL[sessao.papel]} />
         </div>
         <div className="flex items-center gap-2 lg:mt-auto lg:flex-col lg:items-stretch lg:gap-3 lg:border-t lg:border-mata-700 lg:pt-5">

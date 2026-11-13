@@ -10,6 +10,7 @@ import type {
   Interesse,
   Pratica,
   ProjetoDetalhe,
+  ProjetoDoProdutor,
   ProjetoResumo,
   Propriedade,
 } from "./tipos";
@@ -239,6 +240,78 @@ export async function obterProjeto(sessao: Sessao, id: string): Promise<ProjetoD
     objetivo: projeto.objective,
     inicio: projeto.start_date,
     linhaDoTempo: (eventos ?? []).map((e) => ({ estagio: e.stage, nota: e.note, data: e.created_at })),
+  };
+}
+
+/**
+ * Projeto na visão do dono. Lê direto de `projects` (e não da view do marketplace)
+ * para enxergar também os projetos não publicados.
+ */
+export async function obterProjetoDoProdutor(sessao: Sessao, id: string): Promise<ProjetoDoProdutor | null> {
+  if (sessao.modo === "demo") {
+    const p = PROJETOS_DEMO.find((x) => x.id === id && x.donoId === sessao.id);
+    const propriedade = PROPRIEDADES_DEMO.find((x) => x.id === p?.propriedadeId);
+    if (!p || !propriedade) return null;
+    return {
+      ...p,
+      fim: null,
+      propriedade: { id: propriedade.id, nome: propriedade.nome, areaHa: propriedade.areaHa },
+      documentos: [],
+    };
+  }
+
+  const supabase = await createClient();
+  const [{ data: p }, { data: eventos }, { data: docs }] = await Promise.all([
+    supabase
+      .from("projects")
+      .select("*, properties(id, name, city, state, crops, area_ha, is_demo)")
+      .eq("id", id)
+      .eq("owner_id", sessao.id)
+      .maybeSingle(),
+    supabase
+      .from("project_stage_events")
+      .select("stage, note, created_at")
+      .eq("project_id", id)
+      .order("created_at"),
+    supabase
+      .from("project_documents")
+      .select("id, storage_path, file_name, kind, created_at")
+      .eq("project_id", id)
+      .order("created_at", { ascending: false }),
+  ]);
+  if (!p || !p.properties) return null;
+
+  // Bucket privado: gera links temporários (1 h) para o dono abrir os arquivos
+  const caminhos = (docs ?? []).map((d) => d.storage_path);
+  const { data: assinadas } = caminhos.length
+    ? await supabase.storage.from("evidencias").createSignedUrls(caminhos, 3600)
+    : { data: [] };
+
+  return {
+    ...daLinha({
+      ...p,
+      city: p.properties.city,
+      state: p.properties.state,
+      crops: p.properties.crops,
+      is_demo: p.properties.is_demo,
+    }),
+    publicado: p.is_published,
+    objetivo: p.objective,
+    inicio: p.start_date,
+    fim: p.end_date,
+    linhaDoTempo: (eventos ?? []).map((e) => ({ estagio: e.stage, nota: e.note, data: e.created_at })),
+    propriedade: {
+      id: p.properties.id,
+      nome: p.properties.name,
+      areaHa: Number(p.properties.area_ha),
+    },
+    documentos: (docs ?? []).map((d) => ({
+      id: d.id,
+      nome: d.file_name,
+      tipo: d.kind,
+      criadoEm: d.created_at,
+      url: assinadas?.find((a) => a.path === d.storage_path)?.signedUrl ?? null,
+    })),
   };
 }
 

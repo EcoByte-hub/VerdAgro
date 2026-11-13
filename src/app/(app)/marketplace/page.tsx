@@ -11,7 +11,7 @@ import { exigirPapel } from "@/lib/auth/sessao";
 import { listarMarketplace } from "@/lib/dados";
 import type { Pratica } from "@/lib/dados/tipos";
 import { PRATICAS, ROTULO_PRATICA } from "@/lib/diagnostico/schema";
-import { OPCOES_UF } from "@/lib/geo/ufs";
+import { OPCOES_UF, SIGLAS_UF, type SiglaUF } from "@/lib/geo/ufs";
 
 export const metadata: Metadata = { title: "Marketplace" };
 
@@ -45,7 +45,7 @@ async function Resultados({ searchParams }: { searchParams: PageProps<"/marketpl
   const texto = (v: string | string[] | undefined) => (typeof v === "string" && v ? v : undefined);
   const filtros = {
     busca: texto(sp.busca),
-    uf: texto(sp.uf),
+    uf: SIGLAS_UF.includes(sp.uf as SiglaUF) ? (sp.uf as SiglaUF) : undefined,
     pratica: PRATICAS.includes(sp.pratica as Pratica) ? (sp.pratica as Pratica) : undefined,
   };
 

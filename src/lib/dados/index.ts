@@ -5,6 +5,7 @@ import { INTERESSES_DEMO, PROJETOS_DEMO, PROPRIEDADES_DEMO } from "@/lib/demo/ca
 import type { PoligonoGeoJSON } from "@/lib/geo/poligono";
 import { createClient } from "@/lib/supabase/server";
 import type {
+  EdicaoProjeto,
   Estagio,
   FiltrosMarketplace,
   Interesse,
@@ -313,6 +314,42 @@ export async function obterProjetoDoProdutor(sessao: Sessao, id: string): Promis
       url: assinadas?.find((a) => a.path === d.storage_path)?.signedUrl ?? null,
     })),
   };
+}
+
+export async function atualizarProjeto(sessao: Sessao, id: string, dados: EdicaoProjeto) {
+  if (sessao.modo === "demo") return; // demo é somente leitura
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("projects")
+    .update({
+      title: dados.titulo,
+      description: dados.descricao,
+      objective: dados.objetivo,
+      practice: dados.pratica,
+      area_ha: dados.areaHa,
+      methodology: dados.metodologia,
+      start_date: dados.inicio,
+      end_date: dados.fim,
+      commercial_info: dados.infoComercial,
+    })
+    .eq("id", id)
+    .eq("owner_id", sessao.id)
+    .select("id")
+    .single(); // sem linha afetada (RLS ou id errado) vira erro em vez de sucesso silencioso
+  if (error) throw error;
+}
+
+export async function definirPublicacao(sessao: Sessao, id: string, publicado: boolean) {
+  if (sessao.modo === "demo") return;
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("projects")
+    .update({ is_published: publicado })
+    .eq("id", id)
+    .eq("owner_id", sessao.id)
+    .select("id")
+    .single();
+  if (error) throw error;
 }
 
 // ---------------------------------------------------------------------------

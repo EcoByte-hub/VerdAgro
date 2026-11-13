@@ -29,10 +29,11 @@ export const PROPRIEDADES_DEMO: (Propriedade & { donoId: string })[] = [
   },
 ];
 
-export const PROJETOS_DEMO: (ProjetoDetalhe & { donoId: string })[] = [
+export const PROJETOS_DEMO: (ProjetoDetalhe & { donoId: string; propriedadeId: string })[] = [
   {
     id: "bbbbbbbb-0000-4000-8000-000000000001",
     donoId: USUARIOS_DEMO.produtor.id,
+    propriedadeId: FAZENDA_BOA_VISTA.id,
     titulo: "Culturas de cobertura na entressafra",
     descricao:
       "Introdução de mix de cobertura (braquiária + crotalária) após a colheita do milho safrinha, mantendo o plantio direto.",
@@ -58,6 +59,7 @@ export const PROJETOS_DEMO: (ProjetoDetalhe & { donoId: string })[] = [
   {
     id: "bbbbbbbb-0000-4000-8000-000000000002",
     donoId: "22222222-2222-4222-8222-222222222222",
+    propriedadeId: "aaaaaaaa-0000-4000-8000-000000000002",
     titulo: "Recuperação de pastagem degradada",
     descricao: "Reforma de pastagem com correção de solo e manejo rotacionado.",
     pratica: "recuperacao_pastagens",
@@ -83,6 +85,7 @@ export const PROJETOS_DEMO: (ProjetoDetalhe & { donoId: string })[] = [
   {
     id: "bbbbbbbb-0000-4000-8000-000000000003",
     donoId: "22222222-2222-4222-8222-222222222222",
+    propriedadeId: "aaaaaaaa-0000-4000-8000-000000000003",
     titulo: "Expansão de culturas de cobertura",
     descricao: "Ampliação da braquiária consorciada para 100% dos talhões.",
     pratica: "culturas_cobertura",

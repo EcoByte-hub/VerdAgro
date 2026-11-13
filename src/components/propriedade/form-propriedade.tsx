@@ -4,40 +4,14 @@ import { useActionState, useState } from "react";
 import { salvarPropriedade } from "@/app/(app)/produtor/propriedades/nova/actions";
 import { DesenharPoligono } from "@/components/mapa";
 import { Button } from "@/components/ui/button";
-import { FieldError, Input, Label, Select, Textarea } from "@/components/ui/input";
+import { FieldError, Input, Label, Textarea } from "@/components/ui/input";
+import { SeletorAno } from "@/components/ui/seletor-ano";
+import { SeletorOpcoes } from "@/components/ui/seletor-opcoes";
+import type { Pratica } from "@/lib/dados/tipos";
 import { FAZENDA_BOA_VISTA } from "@/lib/demo/fazenda-boa-vista";
 import { PRATICAS, ROTULO_PRATICA } from "@/lib/diagnostico/schema";
 import type { PoligonoGeoJSON } from "@/lib/geo/poligono";
-
-const UFS = [
-  "AC",
-  "AL",
-  "AP",
-  "AM",
-  "BA",
-  "CE",
-  "DF",
-  "ES",
-  "GO",
-  "MA",
-  "MT",
-  "MS",
-  "MG",
-  "PA",
-  "PB",
-  "PR",
-  "PE",
-  "PI",
-  "RJ",
-  "RN",
-  "RS",
-  "RO",
-  "RR",
-  "SC",
-  "SP",
-  "SE",
-  "TO",
-];
+import { OPCOES_UF } from "@/lib/geo/ufs";
 
 export function FormPropriedade() {
   const [estado, acao, pendente] = useActionState(salvarPropriedade, undefined);
@@ -76,14 +50,18 @@ export function FormPropriedade() {
           </div>
           <div>
             <Label htmlFor="uf">UF</Label>
-            <Select id="uf" name="uf" required defaultValue="">
-              <option value="" disabled>
-                UF
-              </option>
-              {UFS.map((uf) => (
-                <option key={uf}>{uf}</option>
-              ))}
-            </Select>
+            <SeletorOpcoes
+              id="uf"
+              name="uf"
+              rotulo="UF"
+              opcoes={OPCOES_UF}
+              placeholder="UF"
+              required
+              mensagemObrigatorio="Escolha a UF"
+              buscavel
+              placeholderBusca="Buscar estado"
+              alinhar="fim"
+            />
           </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -109,27 +87,7 @@ export function FormPropriedade() {
           <legend className="mb-2 text-sm font-semibold text-tinta">Práticas de manejo adotadas</legend>
           <div className="space-y-2">
             {PRATICAS.filter((p) => p !== "outra").map((p) => (
-              <div
-                key={p}
-                className="flex items-center gap-3 rounded-xl border border-areia bg-palha-50 px-3 py-2"
-              >
-                <input
-                  id={`pratica_${p}`}
-                  name={`pratica_${p}`}
-                  type="checkbox"
-                  className="size-4 accent-[#2e5e43]"
-                />
-                <label htmlFor={`pratica_${p}`} className="flex-1 text-sm text-tinta">
-                  {ROTULO_PRATICA[p]}
-                </label>
-                <input
-                  name={`desde_${p}`}
-                  inputMode="numeric"
-                  placeholder="desde"
-                  aria-label={`${ROTULO_PRATICA[p]}: ano de início`}
-                  className="w-20 rounded-lg border border-areia bg-palha px-2 py-1 text-sm"
-                />
-              </div>
+              <LinhaPratica key={p} pratica={p} />
             ))}
           </div>
         </fieldset>
@@ -140,5 +98,35 @@ export function FormPropriedade() {
         </Button>
       </div>
     </form>
+  );
+}
+
+function LinhaPratica({ pratica }: { pratica: Pratica }) {
+  // Controlado para que escolher o ano marque a prática: sem a marcação o servidor descarta o ano
+  const [marcada, setMarcada] = useState(false);
+  const rotulo = ROTULO_PRATICA[pratica];
+
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-areia bg-palha-50 px-3 py-2">
+      <input
+        id={`pratica_${pratica}`}
+        name={`pratica_${pratica}`}
+        type="checkbox"
+        checked={marcada}
+        onChange={(e) => setMarcada(e.target.checked)}
+        className="size-4 accent-[#2e5e43]"
+      />
+      <label htmlFor={`pratica_${pratica}`} className="flex-1 text-sm text-tinta">
+        {rotulo}
+      </label>
+      <SeletorAno
+        name={`desde_${pratica}`}
+        rotulo={`${rotulo}: ano de início`}
+        placeholder="desde"
+        onChange={(ano) => {
+          if (ano !== null) setMarcada(true);
+        }}
+      />
+    </div>
   );
 }

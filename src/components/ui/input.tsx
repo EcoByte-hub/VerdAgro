@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 
-const FIELD =
+/** Visual padrão de campo, reaproveitado por seletores que não são <input> (ex.: SeletorOpcoes). */
+export const FIELD =
   "w-full rounded-xl border border-areia bg-palha-50 px-4 py-3 text-[15px] text-tinta placeholder:text-argila transition-colors focus:border-musgo focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-broto/60 aria-[invalid=true]:border-erro";
 
 export function Input({ className, ...props }: React.ComponentProps<"input">) {

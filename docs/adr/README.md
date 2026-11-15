@@ -10,3 +10,10 @@ Cada decisão relevante vira um arquivo curto: **contexto → decisão → conse
 | [0004](0004-copernicus-ndvi.md) | Copernicus Statistical API para NDVI | Aceita |
 | [0005](0005-ia-saida-estruturada.md) | IA com saída estruturada e guarda-corpos | Aceita |
 | [0006](0006-modo-demonstracao.md) | Modo demonstração com dados de reserva | Aceita |
+
+
+## Spikes
+
+| Tema | Resultado |
+|---|---|
+| [Integração SICAR/CAR](../spike-sicar.md) | Pesquisa de viabilidade; integração ainda não implementada |

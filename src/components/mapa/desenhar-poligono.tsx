@@ -101,6 +101,7 @@ export default function DesenharPoligono({ onChange, inicial }: Props) {
         // Fechar também acontece perto do ÚLTIMO ponto: no toque isso fecha sem querer
         // quando a pessoa corrige um ponto. Lá, fecha-se pelo botão Concluir.
         pointerDistance: toque ? 14 : 40,
+        showCoordinatePoints: true,
         styles: {
           fillColor: CORES.broto,
           fillOpacity: 0.2,
@@ -108,6 +109,12 @@ export default function DesenharPoligono({ onChange, inicial }: Props) {
           outlineWidth: 2.5,
           closingPointColor: CORES.mata,
           closingPointOutlineColor: CORES.broto,
+          closingPointWidth: toque ? 9 : 6,
+          closingPointOutlineWidth: 3,
+          coordinatePointColor: CORES.broto,
+          coordinatePointOutlineColor: CORES.mata,
+          coordinatePointWidth: toque ? 6 : 4,
+          coordinatePointOutlineWidth: 2,
         },
       });
       const draw = new TerraDraw({

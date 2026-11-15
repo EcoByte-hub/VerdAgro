@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { MapPin, Search } from "lucide-react";
+import { useId, useRef, useState } from "react";
+import { MapPin, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type LocalEncontrado = {
@@ -23,6 +23,8 @@ export function BuscaLocal({ onEscolher }: { onEscolher: (local: LocalEncontrado
   const [resultados, setResultados] = useState<LocalEncontrado[] | null>(null);
   const [estado, setEstado] = useState<"parado" | "buscando" | "erro">("parado");
   const pedido = useRef<AbortController | null>(null);
+  const campo = useRef<HTMLInputElement>(null);
+  const idCampo = useId();
 
   async function buscar() {
     const q = texto.trim();
@@ -56,6 +58,14 @@ export function BuscaLocal({ onEscolher }: { onEscolher: (local: LocalEncontrado
     }
   }
 
+  function limparBusca() {
+    pedido.current?.abort();
+    setTexto("");
+    setResultados(null);
+    setEstado("parado");
+    campo.current?.focus();
+  }
+
   function escolher(local: LocalEncontrado) {
     onEscolher(local);
     setResultados(null);
@@ -67,11 +77,15 @@ export function BuscaLocal({ onEscolher }: { onEscolher: (local: LocalEncontrado
   return (
     <div className="relative p-3">
       <div className="flex gap-2">
-        <label className="relative flex-1">
-          <span className="sr-only">Buscar município ou endereço</span>
+        <div className="relative flex-1">
+          <label htmlFor={idCampo} className="sr-only">
+            Buscar município ou endereço
+          </label>
           <Search size={16} className="absolute top-1/2 left-3 -translate-y-1/2 text-argila" aria-hidden />
           {/* sem name: não vai junto com o formulário da propriedade */}
           <input
+            ref={campo}
+            id={idCampo}
             type="search"
             enterKeyHint="search"
             autoComplete="off"
@@ -91,9 +105,21 @@ export function BuscaLocal({ onEscolher }: { onEscolher: (local: LocalEncontrado
               }
             }}
             placeholder="Município ou endereço"
-            className="h-11 w-full rounded-xl border border-palha/20 bg-palha-50 pr-3 pl-9 text-[15px] text-tinta placeholder:text-argila focus:border-broto focus:ring-2 focus:ring-broto/60 focus:outline-none"
+            // Esconde o "x" nativo do type="search" (Chrome/Safari): o botão abaixo segue o visual da página
+            className="h-11 w-full rounded-xl border border-palha/20 bg-palha-50 pr-10 pl-9 text-[15px] text-tinta placeholder:text-argila focus:border-broto focus:ring-2 focus:ring-broto/60 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
           />
-        </label>
+          {texto && (
+            <button
+              type="button"
+              aria-label="Limpar busca"
+              onClick={limparBusca}
+              // altura do campo inteira: alvo de toque de 44 px, só o ícone aparece
+              className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-r-xl text-argila transition-colors hover:text-tinta focus-visible:text-tinta focus-visible:outline-none"
+            >
+              <X size={16} aria-hidden />
+            </button>
+          )}
+        </div>
         <button
           type="button"
           onClick={() => void buscar()}

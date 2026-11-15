@@ -9,8 +9,8 @@ Jornada completa do MVP, em 7 passos (documento de concepção, seção 10). Use
 | 3 | Projeto | Produtor | Cadastro de projeto + evidências | Prática, área, metodologia de referência, anexos |
 | 4 | Marketplace | — | *Marketplace* | Projeto aparece com estágio (tracejado = estimativa) |
 | 5 | Empresa | Empresa | *Marketplace* → filtros → projeto | Localização aproximada, linha do tempo, "nenhum crédito emitido" |
-| 6 | Negociação | Empresa | **Manifestar interesse** | Mensagem e volume de referência |
-| 7 | Resultado | Produtor | *Painel* | "Interesses recebidos" com a mensagem da empresa |
+| 6 | Negociação | Empresa | **Manifestar interesse** (no modo demonstração, "Culturas de cobertura" já aparece com o interesse enviado: use outro projeto) | Mensagem e volume de referência; a empresa pode retirar o interesse e, se o produtor recusar, mandar uma nova proposta |
+| 7 | Resultado | Produtor | *Painel* | Contador no menu e o interesse no topo com o selo "Novo". Com o Supabase, chega na hora: deixe o painel do produtor aberto ao lado da aba da empresa |
 
 ## Falas-chave para a banca
 
@@ -22,6 +22,7 @@ Jornada completa do MVP, em 7 passos (documento de concepção, seção 10). Use
 ## Checklist da véspera
 
 - [ ] Projeto Supabase de produção **ativo** (o plano gratuito pausa após 7 dias sem uso)
+- [ ] Migrations aplicadas na produção (`npx supabase db push`), inclusive a do Realtime de interesses
 - [ ] `npm run db:verificar` passando no ambiente local
 - [ ] Variáveis na Vercel: Supabase, Copernicus, Anthropic
 - [ ] Diagnóstico da Fazenda Boa Vista gerado uma vez com satélite e IA reais (fica salvo)

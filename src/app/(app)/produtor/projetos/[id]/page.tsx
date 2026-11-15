@@ -7,6 +7,7 @@ import { Cabecalho } from "@/components/app/cabecalho";
 import { BotaoPublicacao } from "@/components/projeto/botao-publicacao";
 import { DadosProjeto } from "@/components/projeto/dados-projeto";
 import { EnviarDocumento } from "@/components/projeto/enviar-documento";
+import { InteresseRecebido } from "@/components/projeto/interesse-recebido";
 import { LinhaDoTempo } from "@/components/projeto/linha-do-tempo";
 import { ListaDocumentos } from "@/components/projeto/lista-documentos";
 import { SeloEstagio } from "@/components/projeto/selo-estagio";
@@ -15,8 +16,9 @@ import { Card, CardEyebrow } from "@/components/ui/card";
 import { DemoTag, Tag } from "@/components/ui/tag";
 import { exigirPapel } from "@/lib/auth/sessao";
 import { listarInteresses, obterProjetoDoProdutor } from "@/lib/dados";
-import { ROTULO_STATUS, type ProjetoDoProdutor } from "@/lib/dados/tipos";
+import type { ProjetoDoProdutor } from "@/lib/dados/tipos";
 import { ROTULO_PRATICA } from "@/lib/diagnostico/schema";
+import { ehNovo, ordenarPorAtencao, rotuloNovos } from "@/lib/interesses";
 import { cn, formatHectares, formatNumber } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Meu projeto" };
@@ -24,7 +26,6 @@ export const metadata: Metadata = { title: "Meu projeto" };
 /** Datas "AAAA-MM-DD" do banco: meio-dia evita voltar um dia por causa do fuso. */
 const formatarDia = (dia: string | null) =>
   dia ? new Date(`${dia}T12:00:00`).toLocaleDateString("pt-BR") : null;
-const formatarData = (iso: string) => new Date(iso).toLocaleDateString("pt-BR");
 
 export default function ProjetoDoProdutorPage({ params }: PageProps<"/produtor/projetos/[id]">) {
   return (
@@ -43,6 +44,7 @@ async function Conteudo({ params }: { params: PageProps<"/produtor/projetos/[id]
   ]);
   if (!p) notFound();
   const interesses = todosInteresses.filter((i) => i.projetoId === p.id);
+  const novos = interesses.filter(ehNovo).length;
 
   return (
     <>
@@ -149,21 +151,15 @@ async function Conteudo({ params }: { params: PageProps<"/produtor/projetos/[id]
 
         <div className="min-w-0 space-y-6">
           <Card>
-            <CardEyebrow>Interesses recebidos</CardEyebrow>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <CardEyebrow>Interesses recebidos</CardEyebrow>
+              {novos > 0 && <Tag kind="novo">{rotuloNovos(novos)}</Tag>}
+            </div>
             {interesses.length ? (
               <ul className="mt-4 space-y-3">
-                {interesses.map((i) => (
-                  <li key={i.id} className="rounded-2xl border border-broto-700/40 bg-broto/15 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-sm font-semibold text-tinta">{i.contraparte ?? "Empresa"}</p>
-                      <Tag kind="neutro">{ROTULO_STATUS[i.status]}</Tag>
-                    </div>
-                    <p className="mt-2 text-sm text-tinta">{i.mensagem}</p>
-                    <p className="mt-2 text-xs text-tinta-soft">
-                      {formatarData(i.criadoEm)}
-                      {i.volumeProposto !== null &&
-                        ` · ${formatNumber(i.volumeProposto)} tCO₂e de referência`}
-                    </p>
+                {ordenarPorAtencao(interesses).map((i) => (
+                  <li key={i.id}>
+                    <InteresseRecebido interesse={i} />
                   </li>
                 ))}
               </ul>

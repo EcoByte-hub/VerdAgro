@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { exigirPapel } from "@/lib/auth/sessao";
-import { criarInteresse } from "@/lib/dados";
+import { apagarInteresseDaEmpresa, criarInteresse } from "@/lib/dados";
 
 export type EstadoInteresse = { erro?: string; ok?: string } | undefined;
 
@@ -37,4 +37,25 @@ export async function manifestarInteresse(_: EstadoInteresse, formData: FormData
         ? "Interesse simulado (modo demonstração). No app conectado, o produtor recebe no painel."
         : "Interesse enviado! O produtor vai receber no painel.",
   };
+}
+
+/** A empresa desiste do interesse enquanto ele está em aberto; depois pode enviar outro. */
+export async function retirarInteresse(interesseId: string): Promise<{ erro?: string } | undefined> {
+  const sessao = await exigirPapel("empresa");
+  if (!z.uuid().safeParse(interesseId).success) return { erro: "Interesse inválido." };
+
+  if (sessao.modo === "demo") {
+    return { erro: "No modo demonstração o interesse não é retirado. Configure o Supabase para isso." };
+  }
+
+  try {
+    const retirado = await apagarInteresseDaEmpresa(sessao, interesseId);
+    if (!retirado) return { erro: "Este interesse não pode mais ser retirado. Atualize a página." };
+    revalidatePath("/empresa");
+    revalidatePath(`/marketplace/${retirado.projetoId}`);
+  } catch (e) {
+    console.error("[interesses] retirar", e);
+    return { erro: "Não foi possível retirar agora. Tente novamente." };
+  }
+  return undefined;
 }

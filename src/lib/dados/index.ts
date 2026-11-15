@@ -4,6 +4,7 @@ import type { Sessao } from "@/lib/auth/sessao";
 import { INTERESSES_DEMO, PROJETOS_DEMO, PROPRIEDADES_DEMO } from "@/lib/demo/catalogo";
 import { BUCKET_EVIDENCIAS } from "@/lib/documentos";
 import type { PoligonoGeoJSON } from "@/lib/geo/poligono";
+import { contarNovosPorProjeto, STATUS_ABERTOS } from "@/lib/interesses";
 import { createClient } from "@/lib/supabase/server";
 import type {
   DocumentoProjeto,
@@ -458,12 +459,39 @@ export async function listarInteresses(sessao: Sessao): Promise<Interesse[]> {
   });
 }
 
+/** Interesses ainda sem resposta, por projeto do produtor: contador do menu e destaque nos cards. */
+export async function contarInteressesNovos(sessao: Sessao): Promise<Record<string, number>> {
+  if (sessao.modo === "demo") {
+    return contarNovosPorProjeto(INTERESSES_DEMO.filter((i) => i.donoProjetoId === sessao.id));
+  }
+
+  const supabase = await createClient();
+  // O RLS já limita aos projetos do produtor; o filtro pelo dono deixa isso explícito
+  const { data, error } = await supabase
+    .from("interests")
+    .select("project_id, status, projects!inner(owner_id)")
+    .eq("status", "enviada")
+    .eq("projects.owner_id", sessao.id);
+  if (error) throw error;
+  return contarNovosPorProjeto(data.map((i) => ({ projetoId: i.project_id, status: i.status })));
+}
+
 export async function criarInteresse(
   sessao: Sessao,
   dados: { projetoId: string; mensagem: string; volumeProposto: number | null },
 ) {
   if (sessao.modo === "demo") return;
   const supabase = await createClient();
+  // Recusa não bloqueia para sempre: a proposta nova substitui a recusada (o banco aceita
+  // um interesse por empresa e projeto) e chega ao produtor como interesse novo
+  const { error: erroRecusada } = await supabase
+    .from("interests")
+    .delete()
+    .eq("project_id", dados.projetoId)
+    .eq("company_id", sessao.id)
+    .eq("status", "recusada");
+  if (erroRecusada) throw erroRecusada;
+
   const { error } = await supabase.from("interests").insert({
     project_id: dados.projetoId,
     company_id: sessao.id,
@@ -474,4 +502,48 @@ export async function criarInteresse(
     if (error.code === "23505") throw new Error("Você já manifestou interesse neste projeto.");
     throw error;
   }
+}
+
+/**
+ * O produtor recusa um interesse em aberto num projeto dele (o RLS só deixa o dono ou a
+ * empresa atualizarem). Devolve o projeto, ou null se o interesse não existe, não é dele
+ * ou já não está em aberto.
+ */
+export async function marcarInteresseRecusado(
+  sessao: Sessao,
+  interesseId: string,
+): Promise<{ projetoId: string } | null> {
+  if (sessao.modo === "demo") return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("interests")
+    .update({ status: "recusada" })
+    .eq("id", interesseId)
+    .in("status", [...STATUS_ABERTOS])
+    .select("project_id")
+    .maybeSingle();
+  if (error) throw error;
+  return data && { projetoId: data.project_id };
+}
+
+/**
+ * A empresa retira (apaga) o próprio interesse enquanto ele está em aberto. Recusado,
+ * não há o que retirar: ela pode mandar uma proposta nova (criarInteresse substitui).
+ */
+export async function apagarInteresseDaEmpresa(
+  sessao: Sessao,
+  interesseId: string,
+): Promise<{ projetoId: string } | null> {
+  if (sessao.modo === "demo") return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("interests")
+    .delete()
+    .eq("id", interesseId)
+    .eq("company_id", sessao.id)
+    .in("status", [...STATUS_ABERTOS])
+    .select("project_id")
+    .maybeSingle();
+  if (error) throw error;
+  return data && { projetoId: data.project_id };
 }

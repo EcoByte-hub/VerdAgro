@@ -43,6 +43,16 @@
 
   --radius-card: 1.25rem;
   --ease-brota: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Contador que acabou de mudar: pulsa 3 vezes e para (um ping infinito cansa) */
+  --animate-chamar: chamar 1s cubic-bezier(0, 0, 0.2, 1) 3;
+  @keyframes chamar {
+    75%,
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
 }
 
 @layer base {

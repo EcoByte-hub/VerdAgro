@@ -14,8 +14,10 @@ Navegador ──► Vercel (Next.js 16)
                     └─ ia.ts ───────────────────────► Claude API (saída estruturada)
                │
                ▼  @supabase/ssr (cookies)
-            Supabase: Postgres + PostGIS · Auth · Storage · RLS
+            Supabase: Postgres + PostGIS · Auth · Storage · RLS · Realtime
 ```
+
+O navegador também fala direto com o Supabase em dois casos, sempre com o token do usuário e sob RLS: o upload de evidências (Storage) e o aviso de interesse novo no painel do produtor (Realtime na tabela `interests`, que só entrega eventos dos projetos dele).
 
 Cada integração externa tem **reserva demonstrativa**: se a variável de ambiente não existir ou a API falhar, o fluxo continua com dados identificados como demonstrativos ([ADR 0006](adr/0006-modo-demonstracao.md)).
 

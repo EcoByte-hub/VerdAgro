@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { LogOut } from "lucide-react";
 import { sair } from "@/app/(auth)/actions";
 import { Logo } from "@/components/brand/logo";
 import { Tag } from "@/components/ui/tag";
 import { HOME_DO_PAPEL } from "@/lib/auth/rotas";
-import { obterSessao } from "@/lib/auth/sessao";
+import { obterSessao, type Sessao } from "@/lib/auth/sessao";
+import { contarInteressesNovos } from "@/lib/dados";
+import { somarNovos } from "@/lib/interesses";
 import { redirect } from "next/navigation";
 import { NAV_POR_PAPEL, ROTULO_PAPEL } from "./navegacao";
 import { NavLinks } from "./nav-links";
@@ -13,6 +16,7 @@ import { NavLinks } from "./nav-links";
 export async function Shell({ children }: { children: React.ReactNode }) {
   const sessao = await obterSessao();
   if (!sessao) redirect("/entrar");
+  const itens = NAV_POR_PAPEL[sessao.papel];
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
@@ -22,7 +26,14 @@ export async function Shell({ children }: { children: React.ReactNode }) {
           <Logo variant="negative" />
         </Link>
         <div className="order-last basis-full lg:order-none lg:mt-10 lg:flex-1 lg:basis-auto">
-          <NavLinks itens={NAV_POR_PAPEL[sessao.papel]} />
+          {sessao.papel === "produtor" ? (
+            // O menu aparece na hora; o contador chega logo depois, sem segurar a página
+            <Suspense fallback={<NavLinks itens={itens} />}>
+              <NavDoProdutor sessao={sessao} />
+            </Suspense>
+          ) : (
+            <NavLinks itens={itens} />
+          )}
         </div>
         <div className="flex items-center gap-2 lg:mt-auto lg:flex-col lg:items-stretch lg:gap-3 lg:border-t lg:border-mata-700 lg:pt-5">
           <div className="hidden lg:block">
@@ -47,6 +58,14 @@ export async function Shell({ children }: { children: React.ReactNode }) {
       <main className="flex-1 px-4 py-8 sm:px-8 lg:px-12 lg:py-10">{children}</main>
     </div>
   );
+}
+
+async function NavDoProdutor({ sessao }: { sessao: Sessao }) {
+  // Se a contagem falhar, o menu continua funcionando, só sem o número
+  const novos = await contarInteressesNovos(sessao)
+    .then(somarNovos)
+    .catch(() => 0);
+  return <NavLinks itens={NAV_POR_PAPEL.produtor} contadores={{ interessesNovos: novos }} />;
 }
 
 export function ShellCarregando() {

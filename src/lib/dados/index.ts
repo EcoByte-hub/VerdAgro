@@ -16,6 +16,7 @@ import type {
   ProjetoDoProdutor,
   ProjetoResumo,
   Propriedade,
+  TipoDocumento,
 } from "./tipos";
 
 /**
@@ -273,6 +274,53 @@ async function listarDocumentos(supabase: ClienteSupabase, projetoId: string): P
     criadoEm: d.created_at,
     url: assinadas?.find((a) => a.path === d.storage_path)?.signedUrl ?? null,
   }));
+}
+
+/** Registra um arquivo já enviado ao Storage pelo navegador. O RLS só deixa o dono do projeto. */
+export async function registrarDocumento(
+  sessao: Sessao,
+  doc: { projetoId: string; caminho: string; nome: string; tipo: TipoDocumento },
+) {
+  if (sessao.modo === "demo") return;
+  const supabase = await createClient();
+  const { error } = await supabase.from("project_documents").insert({
+    project_id: doc.projetoId,
+    storage_path: doc.caminho,
+    file_name: doc.nome,
+    kind: doc.tipo,
+    uploaded_by: sessao.id,
+  });
+  if (error) throw error;
+}
+
+/**
+ * Apaga o registro e depois o arquivo. O registro vem primeiro porque o RLS confirma
+ * que é o dono; se o arquivo não sair, sobra só um arquivo órfão no bucket privado.
+ * Retorna null quando o documento não existe ou não é do usuário.
+ */
+export async function removerDocumento(sessao: Sessao, documentoId: string) {
+  if (sessao.modo === "demo") return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("project_documents")
+    .delete()
+    .eq("id", documentoId)
+    .select("project_id, storage_path")
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+
+  const { error: erroArquivo } = await supabase.storage.from(BUCKET_EVIDENCIAS).remove([data.storage_path]);
+  if (erroArquivo)
+    console.warn("[documentos] arquivo órfão no bucket:", data.storage_path, erroArquivo.message);
+  return { projetoId: data.project_id };
+}
+
+/** Desfaz um upload cujo registro falhou (a política do Storage só deixa o dono apagar). */
+export async function apagarArquivoEnviado(sessao: Sessao, caminho: string) {
+  if (sessao.modo === "demo") return;
+  const supabase = await createClient();
+  await supabase.storage.from(BUCKET_EVIDENCIAS).remove([caminho]);
 }
 
 /**

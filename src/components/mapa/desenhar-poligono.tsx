@@ -1,6 +1,7 @@
 "use client";
 
 import "maplibre-gl/dist/maplibre-gl.css";
+import type { Map as MapaLibre } from "maplibre-gl";
 import { maplibregl } from "./maplibre";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TerraDraw, TerraDrawPolygonMode } from "terra-draw";
@@ -9,6 +10,7 @@ import { Check, Eraser, PenLine, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { areaHectares, type PoligonoGeoJSON } from "@/lib/geo/poligono";
 import { cn, formatHectares } from "@/lib/utils";
+import { BuscaLocal, type LocalEncontrado } from "./busca-local";
 import { CENTRO_INICIAL, CORES, ESTILO_SATELITE } from "./estilo";
 
 type Props = {
@@ -54,6 +56,7 @@ function pontosConfirmados(f: Feicao | undefined): Ponto[] {
  */
 export default function DesenharPoligono({ onChange, inicial }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const mapaRef = useRef<MapaLibre | null>(null);
   const drawRef = useRef<TerraDraw | null>(null);
   const modoRef = useRef<TerraDrawPolygonMode | null>(null);
   const onChangeRef = useRef(onChange);
@@ -95,6 +98,7 @@ export default function DesenharPoligono({ onChange, inicial }: Props) {
       ...(toque && { clickTolerance: TOQUE.cliqueMapa }),
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    mapaRef.current = map;
 
     map.on("style.load", () => {
       const modo = new TerraDrawPolygonMode({
@@ -151,6 +155,7 @@ export default function DesenharPoligono({ onChange, inicial }: Props) {
       drawRef.current?.stop();
       drawRef.current = null;
       modoRef.current = null;
+      mapaRef.current = null;
       map.remove();
     };
   }, [inicial, toque, sincronizar]);
@@ -184,6 +189,16 @@ export default function DesenharPoligono({ onChange, inicial }: Props) {
     sincronizar();
   }
 
+  function irPara({ limites: [oeste, sul, leste, norte] }: LocalEncontrado) {
+    mapaRef.current?.fitBounds(
+      [
+        [oeste, sul],
+        [leste, norte],
+      ],
+      { padding: 32, maxZoom: 16, duration: 600 },
+    );
+  }
+
   const n = pontos.length;
   const pronto = area !== null;
   const areaParcial = n >= MINIMO_PONTOS ? areaHectares(fecharAnel(pontos)) : null;
@@ -205,6 +220,8 @@ export default function DesenharPoligono({ onChange, inicial }: Props) {
       <p className="sr-only" aria-live="polite">
         {pronto ? `Contorno fechado. Área desenhada: ${formatHectares(area)}.` : instrucao}
       </p>
+
+      <BuscaLocal onEscolher={irPara} />
 
       <div className="relative">
         <div ref={ref} className="h-[420px] w-full sm:h-[480px]" />

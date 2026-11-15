@@ -4,13 +4,14 @@ import { Suspense } from "react";
 import { MapPin } from "lucide-react";
 import { Cabecalho } from "@/components/app/cabecalho";
 import { FormInteresse } from "@/components/projeto/form-interesse";
+import { InteresseEnviado } from "@/components/projeto/interesse-enviado";
 import { LinhaDoTempo } from "@/components/projeto/linha-do-tempo";
 import { ListaDocumentos } from "@/components/projeto/lista-documentos";
 import { SeloEstagio } from "@/components/projeto/selo-estagio";
 import { Card, CardEyebrow, CardTitle } from "@/components/ui/card";
 import { DemoTag } from "@/components/ui/tag";
 import { exigirPapel } from "@/lib/auth/sessao";
-import { obterProjeto } from "@/lib/dados";
+import { listarInteresses, obterProjeto } from "@/lib/dados";
 import { infoEstagio } from "@/lib/dados/tipos";
 import { ROTULO_PRATICA } from "@/lib/diagnostico/schema";
 import { formatHectares, formatNumber } from "@/lib/utils";
@@ -28,8 +29,13 @@ export default function ProjetoPage({ params }: PageProps<"/marketplace/[id]">) 
 async function Conteudo({ params }: { params: PageProps<"/marketplace/[id]">["params"] }) {
   const { id } = await params;
   const sessao = await exigirPapel("empresa", "produtor", "admin");
-  const p = await obterProjeto(sessao, id);
+  const [p, interesses] = await Promise.all([
+    obterProjeto(sessao, id),
+    sessao.papel === "empresa" ? listarInteresses(sessao) : [],
+  ]);
   if (!p) notFound();
+  // Um por empresa e projeto (unique no banco): se já existe, mostra ele no lugar do formulário
+  const meuInteresse = interesses.find((i) => i.projetoId === p.id);
 
   const dados = [
     ["Prática", ROTULO_PRATICA[p.pratica]],
@@ -107,15 +113,18 @@ async function Conteudo({ params }: { params: PageProps<"/marketplace/[id]">["pa
         </div>
 
         <div className="min-w-0 space-y-6">
-          {sessao.papel === "empresa" && (
-            <Card className="border-mata-900/20">
-              <CardTitle>Tenho interesse</CardTitle>
-              <p className="mt-1 mb-4 text-sm text-tinta-soft">
-                O produtor recebe sua mensagem no painel dele.
-              </p>
-              <FormInteresse projetoId={p.id} />
-            </Card>
-          )}
+          {sessao.papel === "empresa" &&
+            (meuInteresse ? (
+              <InteresseEnviado interesse={meuInteresse} />
+            ) : (
+              <Card className="border-mata-900/20">
+                <CardTitle>Tenho interesse</CardTitle>
+                <p className="mt-1 mb-4 text-sm text-tinta-soft">
+                  O produtor recebe sua mensagem no painel dele.
+                </p>
+                <FormInteresse projetoId={p.id} />
+              </Card>
+            ))}
           <Card>
             <CardEyebrow>Rastreabilidade</CardEyebrow>
             <div className="mt-4">

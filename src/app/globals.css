@@ -84,6 +84,15 @@
   background-size: 48px 48px;
 }
 
+/* Mapa: botões de zoom com alvo de toque de 44 px em telas de toque (o padrão é 29 px).
+   .maplibregl-map na frente: o CSS do MapLibre carrega depois e tem a mesma especificidade. */
+@media (pointer: coarse) {
+  .maplibregl-map .maplibregl-ctrl-group button {
+    width: 44px;
+    height: 44px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

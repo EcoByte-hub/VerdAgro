@@ -46,7 +46,7 @@ Outros comandos do banco:
 
 ```bash
 npm run db:reset        # recria o banco do zero (migrations + seed)
-npm run db:verificar    # confere 21 regras de segurança (RLS) com os usuários do seed
+npm run db:verificar    # confere 26 regras de segurança (RLS) com os usuários do seed
 npm run db:tipos        # regenera os tipos TypeScript a partir do schema
 ```
 

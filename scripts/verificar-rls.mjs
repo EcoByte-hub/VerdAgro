@@ -44,7 +44,14 @@ expect('produtor não manifesta interesse', (await q(prod, 'interests', { method
 const ni = await q(emp, 'interests', { method: 'POST', body: JSON.stringify({ project_id: 'bbbbbbbb-0000-4000-8000-000000000001', company_id: '33333333-3333-4333-8333-333333333333', message: 'Interesse de teste' }) });
 expect('empresa manifesta interesse em projeto publicado', ni.status === 201);
 expect('produtor recebe o interesse no projeto dele', len(await q(prod, 'interests?select=id')) === 1);
-if (ni.data?.[0]?.id) await q(emp, `interests?id=eq.${ni.data[0].id}`, { method: 'DELETE' });
+const iNi = `interests?id=eq.${ni.data?.[0]?.id}`;
+const mudarStatus = (s) => ({ method: 'PATCH', body: JSON.stringify({ status: s }) });
+expect('empresa não muda o status do interesse', (await q(emp, iNi, mudarStatus('aceita'))).status >= 400);
+expect('outro produtor não recusa interesse de projeto alheio', len(await q(coop, iNi, mudarStatus('recusada'))) === 0);
+expect('produtor recusa interesse no projeto dele', (await q(prod, iNi, mudarStatus('recusada'))).data?.[0]?.status === 'recusada');
+expect('empresa não desfaz a recusa mudando o status', (await q(emp, iNi, mudarStatus('enviada'))).status >= 400);
+// Também é a limpeza do teste: recusada, a empresa apaga para mandar uma proposta nova
+expect('empresa apaga o interesse recusado (para mandar outro)', len(await q(emp, iNi, { method: 'DELETE' })) === 1);
 
 const events = (await q(prod, 'project_stage_events?project_id=eq.bbbbbbbb-0000-4000-8000-000000000001&select=stage&order=created_at')).data;
 expect('linha do tempo registrada', events.map(e => e.stage).join(',') === 'cadastro,analise_inicial,desenvolvimento');

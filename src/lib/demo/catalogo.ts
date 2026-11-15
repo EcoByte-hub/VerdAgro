@@ -55,7 +55,23 @@ export const PROJETOS_DEMO: (ProjetoDetalhe & { donoId: string; propriedadeId: s
       { estagio: "analise_inicial", nota: "Diagnóstico inicial concluído", data: diasAtras(45) },
       { estagio: "desenvolvimento", nota: null, data: diasAtras(10) },
     ],
-    documentos: [],
+    // Sem arquivo de verdade (url null): mostram o passo 3 do roteiro no modo demonstração
+    documentos: [
+      {
+        id: "dddddddd-0000-4000-8000-000000000001",
+        nome: "CAR - Fazenda Boa Vista (demonstrativo).pdf",
+        tipo: "car",
+        criadoEm: diasAtras(58),
+        url: null,
+      },
+      {
+        id: "dddddddd-0000-4000-8000-000000000002",
+        nome: "Laudo de análise de solo 2025 (demonstrativo).pdf",
+        tipo: "laudo",
+        criadoEm: diasAtras(44),
+        url: null,
+      },
+    ],
   },
   {
     id: "bbbbbbbb-0000-4000-8000-000000000002",

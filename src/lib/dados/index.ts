@@ -4,6 +4,7 @@ import type { Sessao } from "@/lib/auth/sessao";
 import { INTERESSES_DEMO, PROJETOS_DEMO, PROPRIEDADES_DEMO } from "@/lib/demo/catalogo";
 import { BUCKET_EVIDENCIAS } from "@/lib/documentos";
 import type { PoligonoGeoJSON } from "@/lib/geo/poligono";
+import { contarNovosPorProjeto } from "@/lib/interesses";
 import { createClient } from "@/lib/supabase/server";
 import type {
   DocumentoProjeto,
@@ -456,6 +457,23 @@ export async function listarInteresses(sessao: Sessao): Promise<Interesse[]> {
       criadoEm: i.created_at,
     };
   });
+}
+
+/** Interesses ainda sem resposta, por projeto do produtor: contador do menu e destaque nos cards. */
+export async function contarInteressesNovos(sessao: Sessao): Promise<Record<string, number>> {
+  if (sessao.modo === "demo") {
+    return contarNovosPorProjeto(INTERESSES_DEMO.filter((i) => i.donoProjetoId === sessao.id));
+  }
+
+  const supabase = await createClient();
+  // O RLS já limita aos projetos do produtor; o filtro pelo dono deixa isso explícito
+  const { data, error } = await supabase
+    .from("interests")
+    .select("project_id, status, projects!inner(owner_id)")
+    .eq("status", "enviada")
+    .eq("projects.owner_id", sessao.id);
+  if (error) throw error;
+  return contarNovosPorProjeto(data.map((i) => ({ projetoId: i.project_id, status: i.status })));
 }
 
 export async function criarInteresse(

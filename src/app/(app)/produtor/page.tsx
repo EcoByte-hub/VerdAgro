@@ -2,16 +2,17 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Carregando } from "@/components/app/carregando";
 import Link from "next/link";
-import { Bell, MapPinned, Plus } from "lucide-react";
+import { Bell, BellRing, MapPinned, Plus } from "lucide-react";
 import { Cabecalho } from "@/components/app/cabecalho";
 import { CardProjeto } from "@/components/projeto/card-projeto";
+import { InteresseRecebido } from "@/components/projeto/interesse-recebido";
 import { CardPropriedade } from "@/components/propriedade/card-propriedade";
 import { buttonClasses } from "@/components/ui/button";
-import { Card, CardEyebrow, CardTitle } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { Tag } from "@/components/ui/tag";
 import { exigirPapel } from "@/lib/auth/sessao";
 import { listarInteresses, listarProjetosDoProdutor, listarPropriedades } from "@/lib/dados";
-import { ROTULO_STATUS } from "@/lib/dados/tipos";
+import { contarNovosPorProjeto, ordenarPorAtencao, rotuloNovos, somarNovos } from "@/lib/interesses";
 
 export const metadata: Metadata = { title: "Painel do produtor" };
 
@@ -22,6 +23,8 @@ async function Conteudo() {
     listarProjetosDoProdutor(sessao),
     listarInteresses(sessao),
   ]);
+  const novosPorProjeto = contarNovosPorProjeto(interesses);
+  const totalNovos = somarNovos(novosPorProjeto);
 
   return (
     <>
@@ -38,22 +41,24 @@ async function Conteudo() {
 
       {interesses.length > 0 && (
         <section aria-labelledby="interesses" className="mb-10">
-          <h2 id="interesses" className="mb-3 flex items-center gap-2 text-sm font-semibold text-tinta">
-            <Bell size={16} className="text-musgo" /> Interesses recebidos
-          </h2>
-          <div className="grid gap-3">
-            {interesses.map((i) => (
-              <Card key={i.id} className="border-broto-700/40 bg-broto/15">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <CardEyebrow className="text-musgo">
-                    {i.contraparte ?? "Empresa"} · {i.projetoTitulo}
-                  </CardEyebrow>
-                  <Tag kind="neutro">{ROTULO_STATUS[i.status]}</Tag>
-                </div>
-                <p className="mt-3 text-tinta">{i.mensagem}</p>
-              </Card>
-            ))}
+          <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h2 id="interesses" className="flex items-center gap-2 text-sm font-semibold text-tinta">
+              {totalNovos > 0 ? (
+                <BellRing size={16} className="text-musgo" aria-hidden />
+              ) : (
+                <Bell size={16} className="text-musgo" aria-hidden />
+              )}
+              Interesses recebidos
+            </h2>
+            {totalNovos > 0 && <Tag kind="novo">{rotuloNovos(totalNovos)}</Tag>}
           </div>
+          <ul className="grid gap-3">
+            {ordenarPorAtencao(interesses).map((i) => (
+              <li key={i.id}>
+                <InteresseRecebido interesse={i} mostrarProjeto />
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 
@@ -100,7 +105,13 @@ async function Conteudo() {
         {projetos.length ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {projetos.map((p) => (
-              <CardProjeto key={p.id} projeto={p} href={`/produtor/projetos/${p.id}`} mostrarPublicacao />
+              <CardProjeto
+                key={p.id}
+                projeto={p}
+                href={`/produtor/projetos/${p.id}`}
+                mostrarPublicacao
+                interessesNovos={novosPorProjeto[p.id]}
+              />
             ))}
           </div>
         ) : (

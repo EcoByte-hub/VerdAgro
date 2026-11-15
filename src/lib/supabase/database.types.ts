@@ -578,6 +578,20 @@ export type Database = {
     };
     Functions: {
       current_role_is: { Args: { target: Database["public"]["Enums"]["user_role"] }; Returns: boolean };
+      indicadores_admin: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          companies: number;
+          demo_properties: number;
+          hectares: number;
+          interests: number;
+          issued_credits: number;
+          producers: number;
+          projects: number;
+          projects_in_validation: number;
+          properties: number;
+        }[];
+      };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       owns_project: { Args: { target: string }; Returns: boolean };
       owns_property: { Args: { target: string }; Returns: boolean };

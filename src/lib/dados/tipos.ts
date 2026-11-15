@@ -115,6 +115,20 @@ export type Interesse = {
   criadoEm: string;
 };
 
+export type IndicadoresAdmin = {
+  produtores: number;
+  propriedades: number;
+  /** Soma das áreas das propriedades, sem duplicar por projeto. */
+  hectares: number;
+  projetos: number;
+  empresas: number;
+  interesses: number;
+  /** Projetos cujo estágio atual é exatamente validação. */
+  projetosEmValidacao: number;
+  creditosEmitidos: number;
+  propriedadesDemo: number;
+};
+
 export type FiltrosMarketplace = {
   uf?: string;
   pratica?: Pratica;

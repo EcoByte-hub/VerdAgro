@@ -4,6 +4,7 @@
  * (lê a URL e a chave publicável de `supabase status`)
  */
 import { execSync } from 'node:child_process';
+import { verificarIndicadoresAdmin } from './verificar-indicadores-admin.mjs';
 
 const status = JSON.parse(execSync('npx -y supabase@3 status -o json', { encoding: 'utf8' }));
 const API = status.API_URL, KEY = status.PUBLISHABLE_KEY;
@@ -22,6 +23,7 @@ const prod = await login('produtor@demo.verdagro.app');
 const coop = await login('coop@demo.verdagro.app');
 const emp = await login('empresa@demo.verdagro.app');
 const adm = await login('admin@demo.verdagro.app');
+await verificarIndicadoresAdmin({ q, expect, prod, coop, emp, adm, anon: KEY });
 const len = r => (Array.isArray(r.data) ? r.data.length : -1);
 
 expect('produtor vê só a própria propriedade', len(await q(prod, 'properties?select=id')) === 1);

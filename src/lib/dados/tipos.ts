@@ -60,27 +60,33 @@ export type ProjetoResumo = {
 
 export type EventoLinhaDoTempo = { estagio: Estagio; nota: string | null; data: string };
 
-export type ProjetoDetalhe = ProjetoResumo & {
-  objetivo: string | null;
-  inicio: string | null;
-  linhaDoTempo: EventoLinhaDoTempo[];
-};
+/** Tipos de documento (project_documents.kind). Ordem = ordem no seletor. */
+export const TIPOS_DOCUMENTO = ["car", "nota_fiscal", "laudo", "foto", "evidencia", "outro"] as const;
+export type TipoDocumento = (typeof TIPOS_DOCUMENTO)[number];
 
+/** Record<string, …>: kind é texto livre no banco, então pode vir um tipo fora da lista. */
 export const ROTULO_DOCUMENTO: Record<string, string> = {
-  evidencia: "Evidência",
   car: "CAR",
   nota_fiscal: "Nota fiscal",
   laudo: "Laudo",
+  foto: "Foto",
+  evidencia: "Evidência",
   outro: "Outro",
-};
+} satisfies Record<TipoDocumento, string>;
 
 export type DocumentoProjeto = {
   id: string;
   nome: string;
   tipo: string;
   criadoEm: string;
-  /** link assinado e temporário (bucket privado); null se não foi possível gerar */
+  /** link assinado e temporário (bucket privado); null se não foi possível gerar ou é demonstrativo */
   url: string | null;
+};
+
+export type ProjetoDetalhe = ProjetoResumo & {
+  objetivo: string | null;
+  inicio: string | null;
+  linhaDoTempo: EventoLinhaDoTempo[];
 };
 
 /** Visão do dono: inclui o que nunca vai para o marketplace (rascunho, documentos, propriedade). */

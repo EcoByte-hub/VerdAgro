@@ -5,6 +5,7 @@ import { MapPin } from "lucide-react";
 import { Cabecalho } from "@/components/app/cabecalho";
 import { FormInteresse } from "@/components/projeto/form-interesse";
 import { LinhaDoTempo } from "@/components/projeto/linha-do-tempo";
+import { ListaDocumentos } from "@/components/projeto/lista-documentos";
 import { SeloEstagio } from "@/components/projeto/selo-estagio";
 import { Card, CardEyebrow, CardTitle } from "@/components/ui/card";
 import { DemoTag } from "@/components/ui/tag";
@@ -93,6 +94,15 @@ async function Conteudo({ params }: { params: PageProps<"/marketplace/[id]">["pa
               <p className="mt-2 text-tinta">{p.infoComercial}</p>
             </Card>
           )}
+
+          <Card>
+            <CardEyebrow>Documentos e evidências</CardEyebrow>
+            <ListaDocumentos
+              documentos={p.documentos}
+              demo={sessao.modo === "demo"}
+              vazio="O produtor ainda não anexou documentos a este projeto."
+            />
+          </Card>
         </div>
 
         <div className="space-y-6">

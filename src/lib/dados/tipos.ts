@@ -87,13 +87,14 @@ export type ProjetoDetalhe = ProjetoResumo & {
   objetivo: string | null;
   inicio: string | null;
   linhaDoTempo: EventoLinhaDoTempo[];
+  /** RLS: o dono vê sempre; empresas, só de projeto publicado */
+  documentos: DocumentoProjeto[];
 };
 
-/** Visão do dono: inclui o que nunca vai para o marketplace (rascunho, documentos, propriedade). */
+/** Visão do dono: inclui o que nunca vai para o marketplace (rascunho, propriedade). */
 export type ProjetoDoProdutor = ProjetoDetalhe & {
   fim: string | null;
   propriedade: { id: string; nome: string; areaHa: number };
-  documentos: DocumentoProjeto[];
 };
 
 /** Campos que o produtor pode editar. Estágio e créditos não entram: dependem de verificação externa. */

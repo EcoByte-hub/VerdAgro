@@ -55,6 +55,7 @@ export const PROJETOS_DEMO: (ProjetoDetalhe & { donoId: string; propriedadeId: s
       { estagio: "analise_inicial", nota: "Diagnóstico inicial concluído", data: diasAtras(45) },
       { estagio: "desenvolvimento", nota: null, data: diasAtras(10) },
     ],
+    documentos: [],
   },
   {
     id: "bbbbbbbb-0000-4000-8000-000000000002",
@@ -81,6 +82,7 @@ export const PROJETOS_DEMO: (ProjetoDetalhe & { donoId: string; propriedadeId: s
       { estagio: "desenvolvimento", nota: null, data: diasAtras(120) },
       { estagio: "validacao", nota: null, data: diasAtras(30) },
     ],
+    documentos: [],
   },
   {
     id: "bbbbbbbb-0000-4000-8000-000000000003",
@@ -108,6 +110,7 @@ export const PROJETOS_DEMO: (ProjetoDetalhe & { donoId: string; propriedadeId: s
       { estagio: "validacao", nota: "Validação por organismo independente", data: diasAtras(150) },
       { estagio: "monitoramento", nota: null, data: diasAtras(40) },
     ],
+    documentos: [],
   },
 ];
 

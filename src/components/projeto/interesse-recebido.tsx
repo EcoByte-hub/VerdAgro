@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { recusarInteresse } from "@/app/(app)/produtor/projetos/[id]/actions";
+import { ConfirmarAcao } from "@/components/ui/confirmar-acao";
 import { Tag } from "@/components/ui/tag";
 import { ROTULO_STATUS, type Interesse } from "@/lib/dados/tipos";
-import { ehNovo } from "@/lib/interesses";
+import { ehNovo, estaAberto } from "@/lib/interesses";
 import { cn, formatNumber } from "@/lib/utils";
 
 const formatarData = (iso: string) => new Date(iso).toLocaleDateString("pt-BR");
@@ -10,6 +12,7 @@ const formatarData = (iso: string) => new Date(iso).toLocaleDateString("pt-BR");
 /**
  * Interesse de uma empresa, na visão do produtor. O que ainda não teve resposta
  * (status "enviada") aparece como "Novo", com fundo e faixa lateral de destaque.
+ * Enquanto está em aberto, o produtor pode recusar.
  */
 export function InteresseRecebido({
   interesse: i,
@@ -20,6 +23,7 @@ export function InteresseRecebido({
   mostrarProjeto?: boolean;
 }) {
   const novo = ehNovo(i);
+  const empresa = i.contraparte ?? "esta empresa";
   return (
     <article
       className={cn(
@@ -41,6 +45,17 @@ export function InteresseRecebido({
           Recebido em {formatarData(i.criadoEm)}
           {i.volumeProposto !== null && ` · ${formatNumber(i.volumeProposto)} tCO₂e de referência`}
         </p>
+        {estaAberto(i) && (
+          <ConfirmarAcao
+            rotulo="Recusar"
+            rotuloAcessivel={`Recusar o interesse de ${empresa}`}
+            pergunta={`Recusar o interesse de ${empresa}? A empresa verá o interesse como recusado.`}
+            confirmar="Recusar"
+            executando="Recusando..."
+            acao={recusarInteresse.bind(null, i.id)}
+            className="-my-1 px-3 hover:bg-erro/10 hover:text-erro"
+          />
+        )}
         {mostrarProjeto && (
           <Link
             href={`/produtor/projetos/${i.projetoId}`}

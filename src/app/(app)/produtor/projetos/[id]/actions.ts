@@ -7,6 +7,7 @@ import {
   apagarArquivoEnviado,
   atualizarProjeto,
   definirPublicacao,
+  marcarInteresseRecusado,
   obterProjetoDoProdutor,
   registrarDocumento,
   removerDocumento,
@@ -201,6 +202,28 @@ export async function excluirDocumento(documentoId: string): Promise<EstadoDocum
   } catch (e) {
     console.error("[documentos] remover", e);
     return { erro: "Não foi possível remover agora. Tente novamente." };
+  }
+  return undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Interesses recebidos
+// ---------------------------------------------------------------------------
+export async function recusarInteresse(interesseId: string): Promise<{ erro?: string } | undefined> {
+  const sessao = await exigirPapel("produtor");
+  if (!z.uuid().safeParse(interesseId).success) return { erro: "Interesse inválido." };
+
+  if (sessao.modo === "demo") {
+    return { erro: "No modo demonstração a recusa não é registrada. Configure o Supabase para responder." };
+  }
+
+  try {
+    const recusado = await marcarInteresseRecusado(sessao, interesseId);
+    if (!recusado) return { erro: "Este interesse não está mais em aberto. Atualize a página." };
+    revalidarProjeto(recusado.projetoId);
+  } catch (e) {
+    console.error("[interesses] recusar", e);
+    return { erro: "Não foi possível recusar agora. Tente novamente." };
   }
   return undefined;
 }

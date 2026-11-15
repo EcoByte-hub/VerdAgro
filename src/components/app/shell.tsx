@@ -9,6 +9,7 @@ import { obterSessao, type Sessao } from "@/lib/auth/sessao";
 import { contarInteressesNovos } from "@/lib/dados";
 import { somarNovos } from "@/lib/interesses";
 import { redirect } from "next/navigation";
+import { InteressesAoVivo } from "./interesses-ao-vivo";
 import { NAV_POR_PAPEL, ROTULO_PAPEL } from "./navegacao";
 import { NavLinks } from "./nav-links";
 
@@ -55,6 +56,8 @@ export async function Shell({ children }: { children: React.ReactNode }) {
           </form>
         </div>
       </aside>
+      {/* No modo demonstração não há banco para escutar */}
+      {sessao.papel === "produtor" && sessao.modo === "supabase" && <InteressesAoVivo />}
       <main className="flex-1 px-4 py-8 sm:px-8 lg:px-12 lg:py-10">{children}</main>
     </div>
   );

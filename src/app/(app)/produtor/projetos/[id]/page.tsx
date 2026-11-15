@@ -2,18 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowUpRight, Eye, EyeOff, FileText, MapPin } from "lucide-react";
+import { ArrowUpRight, Eye, EyeOff, MapPin } from "lucide-react";
 import { Cabecalho } from "@/components/app/cabecalho";
 import { BotaoPublicacao } from "@/components/projeto/botao-publicacao";
 import { DadosProjeto } from "@/components/projeto/dados-projeto";
+import { EnviarDocumento } from "@/components/projeto/enviar-documento";
 import { LinhaDoTempo } from "@/components/projeto/linha-do-tempo";
+import { ListaDocumentos } from "@/components/projeto/lista-documentos";
 import { SeloEstagio } from "@/components/projeto/selo-estagio";
 import { buttonClasses } from "@/components/ui/button";
 import { Card, CardEyebrow } from "@/components/ui/card";
 import { DemoTag, Tag } from "@/components/ui/tag";
 import { exigirPapel } from "@/lib/auth/sessao";
 import { listarInteresses, obterProjetoDoProdutor } from "@/lib/dados";
-import { ROTULO_DOCUMENTO, ROTULO_STATUS, type ProjetoDoProdutor } from "@/lib/dados/tipos";
+import { ROTULO_STATUS, type ProjetoDoProdutor } from "@/lib/dados/tipos";
 import { ROTULO_PRATICA } from "@/lib/diagnostico/schema";
 import { cn, formatHectares, formatNumber } from "@/lib/utils";
 
@@ -106,8 +108,9 @@ async function Conteudo({ params }: { params: PageProps<"/produtor/projetos/[id]
         </div>
       </Card>
 
+      {/* min-w-0 nas colunas: nomes longos (truncate) não alargam o grid além da tela */}
       <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <DadosProjeto
             projetoId={p.id}
             areaMaxima={p.propriedade.areaHa}
@@ -128,40 +131,23 @@ async function Conteudo({ params }: { params: PageProps<"/produtor/projetos/[id]
 
           <Card>
             <CardEyebrow>Documentos e evidências</CardEyebrow>
-            {p.documentos.length ? (
-              <ul className="mt-3 divide-y divide-areia">
-                {p.documentos.map((d) => (
-                  <li key={d.id} className="flex items-center gap-3 py-3">
-                    <FileText size={18} className="shrink-0 text-musgo" aria-hidden />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-tinta">{d.nome}</p>
-                      <p className="text-xs text-tinta-soft">
-                        {ROTULO_DOCUMENTO[d.tipo] ?? d.tipo} · {formatarData(d.criadoEm)}
-                      </p>
-                    </div>
-                    {d.url && (
-                      <a
-                        href={d.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="shrink-0 text-sm font-semibold text-musgo underline-offset-4 hover:underline"
-                      >
-                        Abrir
-                      </a>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mt-2 text-sm text-tinta-soft">
-                Nenhum documento anexado ainda. Evidências como CAR, notas fiscais e laudos dão mais confiança
-                a quem compra.
+            <ListaDocumentos
+              documentos={p.documentos}
+              podeRemover
+              demo={sessao.modo === "demo"}
+              vazio="Nenhum documento anexado ainda. Evidências como CAR, notas fiscais e laudos dão mais confiança a quem compra."
+            />
+            <div className="mt-5 border-t border-areia pt-5">
+              <p className="text-sm font-semibold text-tinta">Anexar documento</p>
+              <p className="mt-1 mb-4 text-xs text-tinta-soft">
+                Com o projeto publicado, empresas no marketplace também podem abrir estes arquivos.
               </p>
-            )}
+              <EnviarDocumento projetoId={p.id} demo={sessao.modo === "demo"} />
+            </div>
           </Card>
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Card>
             <CardEyebrow>Interesses recebidos</CardEyebrow>
             {interesses.length ? (

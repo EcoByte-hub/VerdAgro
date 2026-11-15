@@ -2,9 +2,11 @@ import "server-only";
 
 import type { Sessao } from "@/lib/auth/sessao";
 import { INTERESSES_DEMO, PROJETOS_DEMO, PROPRIEDADES_DEMO } from "@/lib/demo/catalogo";
+import { BUCKET_EVIDENCIAS } from "@/lib/documentos";
 import type { PoligonoGeoJSON } from "@/lib/geo/poligono";
 import { createClient } from "@/lib/supabase/server";
 import type {
+  DocumentoProjeto,
   EdicaoProjeto,
   Estagio,
   FiltrosMarketplace,
@@ -14,6 +16,7 @@ import type {
   ProjetoDoProdutor,
   ProjetoResumo,
   Propriedade,
+  TipoDocumento,
 } from "./tipos";
 
 /**
@@ -224,7 +227,7 @@ export async function obterProjeto(sessao: Sessao, id: string): Promise<ProjetoD
   }
 
   const supabase = await createClient();
-  const [{ data: linha }, { data: projeto }, { data: eventos }] = await Promise.all([
+  const [{ data: linha }, { data: projeto }, { data: eventos }, documentos] = await Promise.all([
     supabase.from("marketplace_projects").select("*").eq("id", id).maybeSingle(),
     supabase.from("projects").select("objective, start_date, is_published").eq("id", id).maybeSingle(),
     supabase
@@ -232,6 +235,7 @@ export async function obterProjeto(sessao: Sessao, id: string): Promise<ProjetoD
       .select("stage, note, created_at")
       .eq("project_id", id)
       .order("created_at"),
+    listarDocumentos(supabase, id),
   ]);
   if (!linha || !projeto) return null;
 
@@ -241,7 +245,82 @@ export async function obterProjeto(sessao: Sessao, id: string): Promise<ProjetoD
     objetivo: projeto.objective,
     inicio: projeto.start_date,
     linhaDoTempo: (eventos ?? []).map((e) => ({ estagio: e.stage, nota: e.note, data: e.created_at })),
+    documentos,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Documentos e evidências (bucket privado "evidencias", pasta = id do projeto)
+// ---------------------------------------------------------------------------
+type ClienteSupabase = Awaited<ReturnType<typeof createClient>>;
+
+/** Documentos com link temporário (1 h). O RLS decide quem vê: dono, ou empresa em projeto publicado. */
+async function listarDocumentos(supabase: ClienteSupabase, projetoId: string): Promise<DocumentoProjeto[]> {
+  const { data: docs } = await supabase
+    .from("project_documents")
+    .select("id, storage_path, file_name, kind, created_at")
+    .eq("project_id", projetoId)
+    .order("created_at", { ascending: false });
+  if (!docs?.length) return [];
+
+  const { data: assinadas } = await supabase.storage.from(BUCKET_EVIDENCIAS).createSignedUrls(
+    docs.map((d) => d.storage_path),
+    3600,
+  );
+  return docs.map((d) => ({
+    id: d.id,
+    nome: d.file_name,
+    tipo: d.kind,
+    criadoEm: d.created_at,
+    url: assinadas?.find((a) => a.path === d.storage_path)?.signedUrl ?? null,
+  }));
+}
+
+/** Registra um arquivo já enviado ao Storage pelo navegador. O RLS só deixa o dono do projeto. */
+export async function registrarDocumento(
+  sessao: Sessao,
+  doc: { projetoId: string; caminho: string; nome: string; tipo: TipoDocumento },
+) {
+  if (sessao.modo === "demo") return;
+  const supabase = await createClient();
+  const { error } = await supabase.from("project_documents").insert({
+    project_id: doc.projetoId,
+    storage_path: doc.caminho,
+    file_name: doc.nome,
+    kind: doc.tipo,
+    uploaded_by: sessao.id,
+  });
+  if (error) throw error;
+}
+
+/**
+ * Apaga o registro e depois o arquivo. O registro vem primeiro porque o RLS confirma
+ * que é o dono; se o arquivo não sair, sobra só um arquivo órfão no bucket privado.
+ * Retorna null quando o documento não existe ou não é do usuário.
+ */
+export async function removerDocumento(sessao: Sessao, documentoId: string) {
+  if (sessao.modo === "demo") return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("project_documents")
+    .delete()
+    .eq("id", documentoId)
+    .select("project_id, storage_path")
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+
+  const { error: erroArquivo } = await supabase.storage.from(BUCKET_EVIDENCIAS).remove([data.storage_path]);
+  if (erroArquivo)
+    console.warn("[documentos] arquivo órfão no bucket:", data.storage_path, erroArquivo.message);
+  return { projetoId: data.project_id };
+}
+
+/** Desfaz um upload cujo registro falhou (a política do Storage só deixa o dono apagar). */
+export async function apagarArquivoEnviado(sessao: Sessao, caminho: string) {
+  if (sessao.modo === "demo") return;
+  const supabase = await createClient();
+  await supabase.storage.from(BUCKET_EVIDENCIAS).remove([caminho]);
 }
 
 /**
@@ -257,12 +336,11 @@ export async function obterProjetoDoProdutor(sessao: Sessao, id: string): Promis
       ...p,
       fim: null,
       propriedade: { id: propriedade.id, nome: propriedade.nome, areaHa: propriedade.areaHa },
-      documentos: [],
     };
   }
 
   const supabase = await createClient();
-  const [{ data: p }, { data: eventos }, { data: docs }] = await Promise.all([
+  const [{ data: p }, { data: eventos }, documentos] = await Promise.all([
     supabase
       .from("projects")
       .select("*, properties(id, name, city, state, crops, area_ha, is_demo)")
@@ -274,19 +352,9 @@ export async function obterProjetoDoProdutor(sessao: Sessao, id: string): Promis
       .select("stage, note, created_at")
       .eq("project_id", id)
       .order("created_at"),
-    supabase
-      .from("project_documents")
-      .select("id, storage_path, file_name, kind, created_at")
-      .eq("project_id", id)
-      .order("created_at", { ascending: false }),
+    listarDocumentos(supabase, id),
   ]);
   if (!p || !p.properties) return null;
-
-  // Bucket privado: gera links temporários (1 h) para o dono abrir os arquivos
-  const caminhos = (docs ?? []).map((d) => d.storage_path);
-  const { data: assinadas } = caminhos.length
-    ? await supabase.storage.from("evidencias").createSignedUrls(caminhos, 3600)
-    : { data: [] };
 
   return {
     ...daLinha({
@@ -306,13 +374,7 @@ export async function obterProjetoDoProdutor(sessao: Sessao, id: string): Promis
       nome: p.properties.name,
       areaHa: Number(p.properties.area_ha),
     },
-    documentos: (docs ?? []).map((d) => ({
-      id: d.id,
-      nome: d.file_name,
-      tipo: d.kind,
-      criadoEm: d.created_at,
-      url: assinadas?.find((a) => a.path === d.storage_path)?.signedUrl ?? null,
-    })),
+    documentos,
   };
 }
 

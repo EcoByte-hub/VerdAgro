@@ -3,8 +3,17 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { exigirPapel } from "@/lib/auth/sessao";
-import { atualizarProjeto, definirPublicacao, obterProjetoDoProdutor } from "@/lib/dados";
+import {
+  apagarArquivoEnviado,
+  atualizarProjeto,
+  definirPublicacao,
+  obterProjetoDoProdutor,
+  registrarDocumento,
+  removerDocumento,
+} from "@/lib/dados";
+import { ROTULO_DOCUMENTO, TIPOS_DOCUMENTO } from "@/lib/dados/tipos";
 import { PRATICAS } from "@/lib/diagnostico/schema";
+import { caminhoValido } from "@/lib/documentos";
 import { formatHectares } from "@/lib/utils";
 
 /** `valores` devolve o que foi digitado, para o formulário não perder o texto quando há erro. */
@@ -132,5 +141,66 @@ export async function alterarPublicacao(_: EstadoPublicacao, formData: FormData)
   }
 
   revalidarProjeto(dados.data.projetoId);
+  return undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Documentos. O arquivo vai do navegador direto para o Storage (até 10 MB não
+// passaria pelo limite de 1 MB das server actions); aqui só se registra/remove.
+// ---------------------------------------------------------------------------
+export type EstadoDocumento = { erro?: string; ok?: string } | undefined;
+
+const schemaDocumento = z
+  .object({
+    projetoId: z.uuid(),
+    caminho: z.string(),
+    nome: z.string().trim().min(1, "Arquivo sem nome").max(200, "Nome do arquivo muito longo"),
+    tipo: z.enum(TIPOS_DOCUMENTO, "Escolha o tipo do documento"),
+  })
+  .refine((d) => caminhoValido(d.projetoId, d.caminho), "Arquivo inválido");
+
+export async function anexarDocumento(dados: {
+  projetoId: string;
+  caminho: string;
+  nome: string;
+  tipo: string;
+}): Promise<EstadoDocumento> {
+  const sessao = await exigirPapel("produtor");
+  const doc = schemaDocumento.safeParse(dados);
+  if (!doc.success) return { erro: doc.error.issues[0].message };
+
+  if (sessao.modo === "demo") {
+    return { erro: "No modo demonstração os arquivos não são enviados." };
+  }
+
+  try {
+    await registrarDocumento(sessao, doc.data);
+  } catch (e) {
+    console.error("[documentos] registrar", e);
+    // Não deixa o arquivo sem registro no bucket
+    await apagarArquivoEnviado(sessao, doc.data.caminho).catch(() => {});
+    return { erro: "Não foi possível registrar o documento. Tente novamente." };
+  }
+
+  revalidarProjeto(doc.data.projetoId);
+  return { ok: `${ROTULO_DOCUMENTO[doc.data.tipo]} anexado.` };
+}
+
+export async function excluirDocumento(documentoId: string): Promise<EstadoDocumento> {
+  const sessao = await exigirPapel("produtor");
+  if (!z.uuid().safeParse(documentoId).success) return { erro: "Documento inválido." };
+
+  if (sessao.modo === "demo") {
+    return { erro: "No modo demonstração os documentos não são removidos." };
+  }
+
+  try {
+    const removido = await removerDocumento(sessao, documentoId);
+    if (!removido) return { erro: "Documento não encontrado." };
+    revalidarProjeto(removido.projetoId);
+  } catch (e) {
+    console.error("[documentos] remover", e);
+    return { erro: "Não foi possível remover agora. Tente novamente." };
+  }
   return undefined;
 }

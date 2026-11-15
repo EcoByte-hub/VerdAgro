@@ -34,8 +34,10 @@ async function Conteudo({ params }: { params: PageProps<"/marketplace/[id]">["pa
     sessao.papel === "empresa" ? listarInteresses(sessao) : [],
   ]);
   if (!p) notFound();
-  // Um por empresa e projeto (unique no banco): se já existe, mostra ele no lugar do formulário
+  // Um por empresa e projeto (unique no banco): se já existe, mostra ele no lugar do formulário.
+  // Recusado, o formulário volta (com a proposta anterior) para a empresa tentar de novo.
   const meuInteresse = interesses.find((i) => i.projetoId === p.id);
+  const recusado = meuInteresse?.status === "recusada";
 
   const dados = [
     ["Prática", ROTULO_PRATICA[p.pratica]],
@@ -114,15 +116,31 @@ async function Conteudo({ params }: { params: PageProps<"/marketplace/[id]">["pa
 
         <div className="min-w-0 space-y-6">
           {sessao.papel === "empresa" &&
-            (meuInteresse ? (
+            (meuInteresse && !recusado ? (
               <InteresseEnviado interesse={meuInteresse} />
             ) : (
               <Card className="border-mata-900/20">
-                <CardTitle>Tenho interesse</CardTitle>
-                <p className="mt-1 mb-4 text-sm text-tinta-soft">
-                  O produtor recebe sua mensagem no painel dele.
-                </p>
-                <FormInteresse projetoId={p.id} />
+                <CardTitle>{recusado ? "Nova proposta" : "Tenho interesse"}</CardTitle>
+                {recusado ? (
+                  <p className="mt-2 mb-4 rounded-2xl bg-areia/50 p-4 text-sm text-tinta">
+                    O produtor recusou sua proposta de{" "}
+                    {new Date(meuInteresse.criadoEm).toLocaleDateString("pt-BR")}. Se quiser, ajuste a
+                    mensagem abaixo e envie de novo: ela substitui a anterior e chega ao produtor como um
+                    interesse novo.
+                  </p>
+                ) : (
+                  <p className="mt-1 mb-4 text-sm text-tinta-soft">
+                    O produtor recebe sua mensagem no painel dele.
+                  </p>
+                )}
+                <FormInteresse
+                  projetoId={p.id}
+                  anterior={
+                    recusado
+                      ? { mensagem: meuInteresse.mensagem, volume: meuInteresse.volumeProposto }
+                      : undefined
+                  }
+                />
               </Card>
             ))}
           <Card>

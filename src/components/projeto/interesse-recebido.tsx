@@ -49,7 +49,7 @@ export function InteresseRecebido({
           <ConfirmarAcao
             rotulo="Recusar"
             rotuloAcessivel={`Recusar o interesse de ${empresa}`}
-            pergunta={`Recusar o interesse de ${empresa}? A empresa verá o interesse como recusado.`}
+            pergunta={`Recusar o interesse de ${empresa}? A empresa verá a recusa e poderá mandar uma nova proposta.`}
             confirmar="Recusar"
             executando="Recusando..."
             acao={recusarInteresse.bind(null, i.id)}

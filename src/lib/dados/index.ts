@@ -482,6 +482,16 @@ export async function criarInteresse(
 ) {
   if (sessao.modo === "demo") return;
   const supabase = await createClient();
+  // Recusa não bloqueia para sempre: a proposta nova substitui a recusada (o banco aceita
+  // um interesse por empresa e projeto) e chega ao produtor como interesse novo
+  const { error: erroRecusada } = await supabase
+    .from("interests")
+    .delete()
+    .eq("project_id", dados.projetoId)
+    .eq("company_id", sessao.id)
+    .eq("status", "recusada");
+  if (erroRecusada) throw erroRecusada;
+
   const { error } = await supabase.from("interests").insert({
     project_id: dados.projetoId,
     company_id: sessao.id,

@@ -6,7 +6,14 @@ import { manifestarInteresse } from "@/app/(app)/marketplace/[id]/actions";
 import { Button } from "@/components/ui/button";
 import { FieldError, Input, Label, Textarea } from "@/components/ui/input";
 
-export function FormInteresse({ projetoId }: { projetoId: string }) {
+export function FormInteresse({
+  projetoId,
+  anterior,
+}: {
+  projetoId: string;
+  /** proposta recusada: o formulário já vem com ela, para a empresa melhorar e reenviar */
+  anterior?: { mensagem: string; volume: number | null };
+}) {
   const [estado, acao, pendente] = useActionState(manifestarInteresse, undefined);
 
   if (estado?.ok) {
@@ -27,19 +34,27 @@ export function FormInteresse({ projetoId }: { projetoId: string }) {
           name="mensagem"
           required
           minLength={10}
+          defaultValue={anterior?.mensagem}
           placeholder="Conte o interesse da sua empresa, prazos e formato de parceria..."
         />
       </div>
       <div>
         <Label htmlFor="volume">Volume de interesse (tCO₂e, opcional)</Label>
-        <Input id="volume" name="volume" inputMode="decimal" placeholder="Ex.: 5000" />
+        <Input
+          id="volume"
+          name="volume"
+          inputMode="decimal"
+          defaultValue={anterior?.volume ?? undefined}
+          placeholder="Ex.: 5000"
+        />
         <p className="mt-1 text-xs text-tinta-soft">
           Referência para negociação futura. Não é compra de crédito emitido.
         </p>
       </div>
       <FieldError>{estado?.erro}</FieldError>
       <Button type="submit" className="w-full" disabled={pendente}>
-        <Send size={16} /> {pendente ? "Enviando..." : "Manifestar interesse"}
+        <Send size={16} />{" "}
+        {pendente ? "Enviando..." : anterior ? "Enviar nova proposta" : "Manifestar interesse"}
       </Button>
     </form>
   );

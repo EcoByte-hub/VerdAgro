@@ -18,6 +18,13 @@ type Props = {
 };
 
 /**
+ * Ajustes para toque. No celular o dedo sempre desliza alguns pixels: com a tolerância
+ * padrão do Terra Draw (1 px antes do primeiro ponto) o toque vira arrasto do mapa e
+ * nenhum ponto é marcado.
+ */
+const TOQUE = { arrasto: 10, arrastoDesenhando: 12, cliqueMapa: 10 };
+
+/**
  * Mapa com desenho do limite da propriedade (MapLibre + Terra Draw).
  * Clique para adicionar vértices; clique no primeiro ponto para fechar.
  */
@@ -25,6 +32,8 @@ export default function DesenharPoligono({ onChange, inicial }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const drawRef = useRef<TerraDraw | null>(null);
   const onChangeRef = useRef(onChange);
+  // Só roda no navegador (o mapa é carregado com ssr: false)
+  const [toque] = useState(() => window.matchMedia("(pointer: coarse)").matches);
   const [area, setArea] = useState<number | null>(inicial ? areaHectares(inicial) : null);
 
   useEffect(() => {
@@ -39,12 +48,19 @@ export default function DesenharPoligono({ onChange, inicial }: Props) {
       center: inicial ? inicial.coordinates[0][0] : CENTRO_INICIAL,
       zoom: 13,
       attributionControl: { compact: true },
+      ...(toque && { clickTolerance: TOQUE.cliqueMapa }),
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
     map.on("style.load", () => {
       const draw = new TerraDraw({
-        adapter: new TerraDrawMapLibreGLAdapter({ map }),
+        adapter: new TerraDrawMapLibreGLAdapter({
+          map,
+          ...(toque && {
+            minPixelDragDistance: TOQUE.arrasto,
+            minPixelDragDistanceDrawing: TOQUE.arrastoDesenhando,
+          }),
+        }),
         modes: [
           new TerraDrawPolygonMode({
             styles: {
@@ -83,7 +99,7 @@ export default function DesenharPoligono({ onChange, inicial }: Props) {
       drawRef.current = null;
       map.remove();
     };
-  }, [inicial]);
+  }, [inicial, toque]);
 
   const limpar = () => {
     drawRef.current?.clear();

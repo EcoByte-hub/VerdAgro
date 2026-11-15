@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
  * - estimativa: contorno TRACEJADO (ainda não é crédito)
  * - certificado: preenchimento SÓLIDO (comprovado)
  */
-export type TagKind = "estimativa" | "verificacao" | "certificado" | "demo" | "neutro";
+export type TagKind = "estimativa" | "verificacao" | "certificado" | "demo" | "neutro" | "novo";
 
 const STYLES: Record<TagKind, string> = {
   estimativa: "border border-dashed border-cerrado text-cerrado",
@@ -14,6 +14,8 @@ const STYLES: Record<TagKind, string> = {
   certificado: "bg-broto text-mata-900",
   demo: "border border-current/25 text-tinta-soft",
   neutro: "bg-areia text-tinta",
+  // algo que pede a atenção do usuário (ex.: interesse ainda sem resposta)
+  novo: "bg-mata-900 text-broto",
 };
 
 const ICONS: Partial<Record<TagKind, typeof CircleDashed>> = {

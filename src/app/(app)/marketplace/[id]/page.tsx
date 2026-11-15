@@ -57,8 +57,9 @@ async function Conteudo({ params }: { params: PageProps<"/marketplace/[id]">["pa
         }
       />
 
+      {/* min-w-0 nas colunas: nomes longos (truncate) não alargam o grid além da tela */}
       <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Card>
             <CardEyebrow>Sobre o projeto</CardEyebrow>
             <p className="mt-3 text-tinta">{p.descricao}</p>
@@ -105,7 +106,7 @@ async function Conteudo({ params }: { params: PageProps<"/marketplace/[id]">["pa
           </Card>
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           {sessao.papel === "empresa" && (
             <Card className="border-mata-900/20">
               <CardTitle>Tenho interesse</CardTitle>

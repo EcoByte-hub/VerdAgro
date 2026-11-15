@@ -124,10 +124,17 @@ export default function DesenharPoligono({ onChange, inicial }: Props) {
 
       if (inicial) {
         draw.addFeatures([{ type: "Feature", properties: { mode: "polygon" }, geometry: inicial }]);
+        draw.setMode("static"); // pronto: um novo toque não começa outro polígono
       }
 
       draw.on("change", sincronizar);
-      draw.on("finish", sincronizar);
+      draw.on("finish", () => {
+        // Fechado tocando no 1º ponto: sai do modo de desenho depois que o Terra Draw termina o evento
+        queueMicrotask(() => {
+          draw.setMode("static");
+          sincronizar();
+        });
+      });
     });
 
     return () => {

@@ -4,7 +4,7 @@ import type { Sessao } from "@/lib/auth/sessao";
 import { INTERESSES_DEMO, PROJETOS_DEMO, PROPRIEDADES_DEMO } from "@/lib/demo/catalogo";
 import { BUCKET_EVIDENCIAS } from "@/lib/documentos";
 import type { PoligonoGeoJSON } from "@/lib/geo/poligono";
-import { contarNovosPorProjeto } from "@/lib/interesses";
+import { contarNovosPorProjeto, STATUS_ABERTOS } from "@/lib/interesses";
 import { createClient } from "@/lib/supabase/server";
 import type {
   DocumentoProjeto,
@@ -492,4 +492,48 @@ export async function criarInteresse(
     if (error.code === "23505") throw new Error("Você já manifestou interesse neste projeto.");
     throw error;
   }
+}
+
+/**
+ * O produtor recusa um interesse em aberto num projeto dele (o RLS só deixa o dono ou a
+ * empresa atualizarem). Devolve o projeto, ou null se o interesse não existe, não é dele
+ * ou já não está em aberto.
+ */
+export async function marcarInteresseRecusado(
+  sessao: Sessao,
+  interesseId: string,
+): Promise<{ projetoId: string } | null> {
+  if (sessao.modo === "demo") return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("interests")
+    .update({ status: "recusada" })
+    .eq("id", interesseId)
+    .in("status", [...STATUS_ABERTOS])
+    .select("project_id")
+    .maybeSingle();
+  if (error) throw error;
+  return data && { projetoId: data.project_id };
+}
+
+/**
+ * A empresa retira (apaga) o próprio interesse enquanto ele está em aberto. Recusado,
+ * não há o que retirar: ela pode mandar uma proposta nova (criarInteresse substitui).
+ */
+export async function apagarInteresseDaEmpresa(
+  sessao: Sessao,
+  interesseId: string,
+): Promise<{ projetoId: string } | null> {
+  if (sessao.modo === "demo") return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("interests")
+    .delete()
+    .eq("id", interesseId)
+    .eq("company_id", sessao.id)
+    .in("status", [...STATUS_ABERTOS])
+    .select("project_id")
+    .maybeSingle();
+  if (error) throw error;
+  return data && { projetoId: data.project_id };
 }

@@ -3,23 +3,30 @@ import { ArrowUpRight, MapPin } from "lucide-react";
 import { DemoTag, Tag } from "@/components/ui/tag";
 import { ROTULO_PRATICA } from "@/lib/diagnostico/schema";
 import type { ProjetoResumo } from "@/lib/dados/tipos";
-import { formatHectares } from "@/lib/utils";
+import { rotuloNovos } from "@/lib/interesses";
+import { cn, formatHectares } from "@/lib/utils";
 import { SeloEstagio } from "./selo-estagio";
 
 export function CardProjeto({
   projeto,
   href,
   mostrarPublicacao = false,
+  interessesNovos = 0,
 }: {
   projeto: ProjetoResumo;
   href: string;
   /** visão do dono: indica se o projeto está no marketplace */
   mostrarPublicacao?: boolean;
+  /** visão do dono: interesses de empresas ainda sem resposta */
+  interessesNovos?: number;
 }) {
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col rounded-[var(--radius-card)] border border-areia bg-palha-50 p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-mata-900/30 hover:shadow-[0_20px_40px_-24px_rgba(14,42,31,0.35)]"
+      className={cn(
+        "group flex h-full flex-col rounded-[var(--radius-card)] border border-areia bg-palha-50 p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-mata-900/30 hover:shadow-[0_20px_40px_-24px_rgba(14,42,31,0.35)]",
+        interessesNovos > 0 && "border-broto-700/50",
+      )}
     >
       <div className="flex flex-wrap items-center gap-2">
         <SeloEstagio estagio={projeto.estagio} />
@@ -40,13 +47,17 @@ export function CardProjeto({
           <dd className="font-semibold text-tinta">{formatHectares(projeto.areaHa)}</dd>
         </div>
       </dl>
-      <span className="mt-auto flex items-center gap-1 pt-5 text-sm font-semibold text-musgo">
-        Ver projeto{" "}
-        <ArrowUpRight
-          size={16}
-          className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-        />
-      </span>
+      {/* O aviso de interesse fica no rodapé: entre os selos do topo ele quebrava a linha em três */}
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-5">
+        <span className="flex items-center gap-1 text-sm font-semibold text-musgo">
+          Ver projeto{" "}
+          <ArrowUpRight
+            size={16}
+            className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+          />
+        </span>
+        {interessesNovos > 0 && <Tag kind="novo">{rotuloNovos(interessesNovos)}</Tag>}
+      </div>
     </Link>
   );
 }

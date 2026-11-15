@@ -8,13 +8,16 @@ import { CardProjeto } from "@/components/projeto/card-projeto";
 import { buttonClasses } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { exigirPapel } from "@/lib/auth/sessao";
-import { listarProjetosDoProdutor } from "@/lib/dados";
+import { contarInteressesNovos, listarProjetosDoProdutor } from "@/lib/dados";
 
 export const metadata: Metadata = { title: "Meus projetos" };
 
 async function Conteudo() {
   const sessao = await exigirPapel("produtor");
-  const projetos = await listarProjetosDoProdutor(sessao);
+  const [projetos, novosPorProjeto] = await Promise.all([
+    listarProjetosDoProdutor(sessao),
+    contarInteressesNovos(sessao),
+  ]);
 
   return (
     <>
@@ -27,7 +30,13 @@ async function Conteudo() {
       {projetos.length ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {projetos.map((p) => (
-            <CardProjeto key={p.id} projeto={p} href={`/produtor/projetos/${p.id}`} mostrarPublicacao />
+            <CardProjeto
+              key={p.id}
+              projeto={p}
+              href={`/produtor/projetos/${p.id}`}
+              mostrarPublicacao
+              interessesNovos={novosPorProjeto[p.id]}
+            />
           ))}
         </div>
       ) : (

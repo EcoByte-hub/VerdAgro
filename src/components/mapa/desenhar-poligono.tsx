@@ -98,6 +98,9 @@ export default function DesenharPoligono({ onChange, inicial }: Props) {
 
     map.on("style.load", () => {
       const modo = new TerraDrawPolygonMode({
+        // Fechar também acontece perto do ÚLTIMO ponto: no toque isso fecha sem querer
+        // quando a pessoa corrige um ponto. Lá, fecha-se pelo botão Concluir.
+        pointerDistance: toque ? 14 : 40,
         styles: {
           fillColor: CORES.broto,
           fillOpacity: 0.2,

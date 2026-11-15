@@ -177,13 +177,35 @@ export default function DesenharPoligono({ onChange, inicial }: Props) {
   const n = pontos.length;
   const pronto = area !== null;
   const areaParcial = n >= MINIMO_PONTOS ? areaHectares(fecharAnel(pontos)) : null;
+  const instrucao = pronto
+    ? null
+    : n === 0
+      ? toque
+        ? "Toque em cada canto da propriedade. Arraste para mover o mapa."
+        : "Clique em cada canto da propriedade."
+      : n < MINIMO_PONTOS
+        ? `${n} de pelo menos ${MINIMO_PONTOS} cantos. Continue marcando.`
+        : `${n} cantos. Marque os que faltam e ${toque ? "toque" : "clique"} em Concluir.`;
 
   const botaoEscuro = "border border-palha/20 text-palha hover:bg-palha/10 hover:text-palha";
 
   return (
     <div className="overflow-hidden rounded-[var(--radius-card)] border border-areia bg-mata-900">
+      {/* Um só anúncio para leitor de tela (a instrução no mapa e o status repetiriam o mesmo) */}
+      <p className="sr-only" aria-live="polite">
+        {pronto ? `Contorno fechado. Área desenhada: ${formatHectares(area)}.` : instrucao}
+      </p>
+
       <div className="relative">
         <div ref={ref} className="h-[420px] w-full sm:h-[480px]" />
+        {instrucao && (
+          <p
+            aria-hidden
+            className="pointer-events-none absolute top-3 left-3 max-w-[calc(100%-5rem)] rounded-2xl bg-mata-900/85 px-3 py-2 text-xs leading-snug text-palha shadow-lg backdrop-blur-sm"
+          >
+            {instrucao}
+          </p>
+        )}
       </div>
 
       <div className="space-y-3 px-4 py-3 text-palha">

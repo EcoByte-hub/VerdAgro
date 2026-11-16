@@ -1,5 +1,7 @@
 import "server-only";
 
+export { obterIndicadoresAdmin } from "./admin";
+
 import type { Sessao } from "@/lib/auth/sessao";
 import { INTERESSES_DEMO, PROJETOS_DEMO, PROPRIEDADES_DEMO } from "@/lib/demo/catalogo";
 import { BUCKET_EVIDENCIAS } from "@/lib/documentos";

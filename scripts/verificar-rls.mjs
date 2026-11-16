@@ -8,6 +8,7 @@
  * propriedade, um projeto e um interesse temporários, apagados no fim (em cascata).
  */
 import { execSync } from 'node:child_process';
+import { verificarIndicadoresAdmin } from './verificar-indicadores-admin.mjs';
 
 const status = JSON.parse(execSync('npx -y supabase@3 status -o json', { encoding: 'utf8' }));
 const API = status.API_URL, KEY = status.PUBLISHABLE_KEY;
@@ -26,6 +27,7 @@ const prod = await login('produtor@demo.verdagro.app');
 const coop = await login('coop@demo.verdagro.app');
 const emp = await login('empresa@demo.verdagro.app');
 const adm = await login('admin@demo.verdagro.app');
+await verificarIndicadoresAdmin({ q, expect, prod, coop, emp, adm, anon: KEY });
 const PROD = '11111111-1111-4111-8111-111111111111', EMP = '33333333-3333-4333-8333-333333333333';
 const len = r => (Array.isArray(r.data) ? r.data.length : -1);
 const linhas = r => (Array.isArray(r.data) ? r.data : []);

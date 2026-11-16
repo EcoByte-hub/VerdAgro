@@ -46,7 +46,7 @@ Outros comandos do banco:
 
 ```bash
 npm run db:reset        # recria o banco do zero (migrations + seed)
-npm run db:verificar    # confere 21 regras de segurança (RLS) com os usuários do seed
+npm run db:verificar    # confere 28 regras de segurança (RLS) com os usuários do seed (roda com qualquer dado no banco)
 npm run db:tipos        # regenera os tipos TypeScript a partir do schema
 ```
 
@@ -58,6 +58,7 @@ npm run db:tipos        # regenera os tipos TypeScript a partir do schema
 | Copernicus / Sentinel-2 (NDVI) | `CDSE_CLIENT_ID`, `CDSE_CLIENT_SECRET` | Série de NDVI demonstrativa |
 | Claude API (diagnóstico) | `ANTHROPIC_API_KEY` (opcional `ANTHROPIC_MODEL`) | Diagnóstico demonstrativo |
 | NASA POWER (clima) | nenhuma | Fixture real de Rio Verde/GO se a API cair |
+| Nominatim / OpenStreetMap (busca de local no mapa) | nenhuma | Busca mostra erro; o desenho segue normal. Política de uso: 1 busca/s, sem autocompletar |
 
 ## 🧰 Stack
 

@@ -49,3 +49,22 @@ Viewports: 390, 640, 1024, 1280 e 1440 px. Sem rolagem horizontal ou erros JavaS
 O modo demonstração também foi navegado em `http://127.0.0.1:3001/admin`, em
 390 e 1440 px. Screenshots temporários dos dois modos e dos estados de erro foram
 inspecionados em `/tmp/verdagro-admin-*.png`, fora do repositório.
+
+## Integração com a main — 16/11/2026
+
+A branch foi atualizada com a main oficial (`fa9fa80`). O conflito em
+`scripts/verificar-rls.mjs` foi resolvido preservando os testes de interesses e a
+chamada dos testes administrativos. Os testes de agregados passaram a comparar
+os totais com os registros atuais, com paginação, sem exigir as quantidades do seed.
+
+Validação da integração: `npm run check` (48 testes), `npm run build` e
+`npm run db:verificar` (45 verificações). O script de RLS também passou com
+1.001 projetos temporários adicionais e créditos fracionários. As fixtures foram
+removidas ao final e as quantidades originais do banco foram preservadas.
+As migrations pendentes foram aplicadas apenas no Supabase local, sem reset.
+
+O Chromium navegou em `http://127.0.0.1:3100/admin` nos viewports de 390, 640,
+1024, 1280 e 1440 px. Foram conferidos login de admin, atualização dos indicadores,
+falha da RPC, recuperação e bloqueio de produtor, empresa e anônimo. Sem overflow
+horizontal ou erros JavaScript. As capturas `/tmp/verdagro-14-integracao-*.png`
+foram inspecionadas fora do repositório.

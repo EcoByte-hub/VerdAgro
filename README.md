@@ -98,7 +98,9 @@ npm run check    # lint + tipos + testes
 npm run build
 ```
 
-A CI (GitHub Actions) roda lint, tipos, testes e build em todo PR.
+A CI (GitHub Actions) roda lint, tipos, testes, build e o roteiro E2E em todo PR e em pushes na `main` ou em branches `codex/**`.
+
+Para executar o roteiro no Chromium (desktop e celular): `npx playwright install chromium` e `npm run e2e`. Não precisa de segredos nem Supabase. Veja [cobertura, limitações da demonstração e relatórios](docs/e2e.md).
 
 ## 📚 Documentação
 

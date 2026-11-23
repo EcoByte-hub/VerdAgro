@@ -1,10 +1,12 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { exigirPapel } from "@/lib/auth/sessao";
 import { obterPropriedade, salvarDiagnostico } from "@/lib/dados";
 import { gerarDiagnostico, type ResultadoDiagnostico } from "@/lib/diagnostico/gerar";
 
-export type RespostaDiagnostico = { ok: true; resultado: ResultadoDiagnostico } | { ok: false; erro: string };
+export type RespostaDiagnostico =
+  { ok: true; resultado: ResultadoDiagnostico; criadoEm: string | null } | { ok: false; erro: string };
 
 /** Gera (e salva) o Diagnóstico Inteligente de uma propriedade do produtor logado. */
 export async function executarDiagnostico(propriedadeId: string): Promise<RespostaDiagnostico> {
@@ -16,14 +18,15 @@ export async function executarDiagnostico(propriedadeId: string): Promise<Respos
     const resultado = await gerarDiagnostico(propriedade);
     if (resultado.falhas.length) console.warn("[diagnóstico] integrações em modo demo:", resultado.falhas);
 
-    await salvarDiagnostico(sessao, propriedade.id, {
+    const criadoEm = await salvarDiagnostico(sessao, propriedade.id, {
       ndvi: resultado.ndvi,
       clima: resultado.clima,
       resultado: resultado.diagnostico,
       origem: resultado.origem,
       modelo: resultado.modelo,
     });
-    return { ok: true, resultado };
+    revalidatePath(`/produtor/propriedades/${propriedade.id}`);
+    return { ok: true, resultado, criadoEm };
   } catch (e) {
     console.error("[diagnóstico]", e);
     return { ok: false, erro: "Não foi possível gerar o diagnóstico agora. Tente novamente." };

@@ -7,7 +7,7 @@ import { MapaPropriedade } from "@/components/mapa";
 import { Card, CardEyebrow } from "@/components/ui/card";
 import { DemoTag } from "@/components/ui/tag";
 import { exigirPapel } from "@/lib/auth/sessao";
-import { obterPropriedade } from "@/lib/dados";
+import { obterPropriedade, obterUltimoDiagnostico, type DiagnosticoSalvo } from "@/lib/dados";
 import { ROTULO_PRATICA } from "@/lib/diagnostico/schema";
 import { formatHectares } from "@/lib/utils";
 
@@ -26,6 +26,16 @@ async function Conteudo({ params }: { params: PageProps<"/produtor/propriedades/
   const sessao = await exigirPapel("produtor");
   const p = await obterPropriedade(sessao, id);
   if (!p) notFound();
+
+  let diagnostico: DiagnosticoSalvo | null = null;
+  let erroDiagnostico: string | undefined;
+  try {
+    diagnostico = await obterUltimoDiagnostico(sessao, p.id);
+  } catch (erro) {
+    console.error("[diagnóstico] carregar salvo", erro);
+    erroDiagnostico =
+      "Não foi possível carregar o diagnóstico salvo. Atualize a página para tentar novamente.";
+  }
 
   return (
     <>
@@ -71,7 +81,12 @@ async function Conteudo({ params }: { params: PageProps<"/produtor/propriedades/
       </div>
 
       <div className="mt-6">
-        <PainelDiagnostico propriedadeId={p.id} />
+        <PainelDiagnostico
+          key={`${p.id}:${diagnostico?.criadoEm ?? (erroDiagnostico ? "erro" : "sem-registro")}`}
+          propriedadeId={p.id}
+          diagnosticoInicial={diagnostico}
+          erroInicial={erroDiagnostico}
+        />
       </div>
     </>
   );

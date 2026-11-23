@@ -221,6 +221,7 @@ export async function recusarInteresse(interesseId: string): Promise<{ erro?: st
     const recusado = await marcarInteresseRecusado(sessao, interesseId);
     if (!recusado) return { erro: "Este interesse não está mais em aberto. Atualize a página." };
     revalidarProjeto(recusado.projetoId);
+    revalidatePath(`/negociacoes/${interesseId}`);
   } catch (e) {
     console.error("[interesses] recusar", e);
     return { erro: "Não foi possível recusar agora. Tente novamente." };

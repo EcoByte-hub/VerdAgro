@@ -45,6 +45,13 @@ export function InteresseRecebido({
           Recebido em {formatarData(i.criadoEm)}
           {i.volumeProposto !== null && ` · ${formatNumber(i.volumeProposto)} tCO₂e de referência`}
         </p>
+        <Link
+          href={`/negociacoes/${i.id}`}
+          className="flex items-center gap-1 text-sm font-semibold text-musgo underline-offset-4 hover:underline"
+        >
+          Abrir negociação <span className="sr-only">com {empresa}</span>
+          <ArrowUpRight size={16} aria-hidden />
+        </Link>
         {estaAberto(i) && (
           <ConfirmarAcao
             rotulo="Recusar"

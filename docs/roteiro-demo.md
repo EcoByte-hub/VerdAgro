@@ -10,7 +10,11 @@ Jornada completa do MVP, em 7 passos (documento de concepção, seção 10). Use
 | 4 | Marketplace | — | *Marketplace* | Projeto aparece com estágio (tracejado = estimativa) |
 | 5 | Empresa | Empresa | *Marketplace* → filtros → projeto | Localização aproximada, linha do tempo, "nenhum crédito emitido" |
 | 6 | Negociação | Empresa | **Manifestar interesse** (no modo demonstração, "Culturas de cobertura" já aparece com o interesse enviado: use outro projeto) | Mensagem e volume de referência; a empresa pode retirar o interesse e, se o produtor recusar, mandar uma nova proposta |
-| 7 | Resultado | Produtor | *Painel* | Contador no menu e o interesse no topo com o selo "Novo". Com o Supabase, chega na hora: deixe o painel do produtor aberto ao lado da aba da empresa |
+| 7 | Resultado | Produtor e empresa | *Painel* → **Abrir negociação** | Produtor inicia negociação, aceita ou recusa. Os dois participantes enviam mensagens e consultam o mesmo histórico. Use duas sessões do navegador para mostrar os dois lados |
+
+Com o Supabase local, entre com `produtor@demo.verdagro.app` e `empresa@demo.verdagro.app` em sessões separadas. O aviso de interesse novo no painel do produtor chega em tempo real. Na conversa, use **Atualizar conversa** para buscar novas mensagens da outra ponta. A proposta inicial fica identificada no histórico; o volume é uma referência, sem compra ou pagamento no MVP.
+
+No modo demonstração, a negociação existente pode ser consultada, mas respostas e mensagens não são gravadas. Para mostrar a troca completa, use o Supabase com os usuários do seed.
 
 ## Falas-chave para a banca
 

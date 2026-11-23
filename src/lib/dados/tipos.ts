@@ -141,3 +141,17 @@ export type FiltrosMarketplace = {
   pratica?: Pratica;
   busca?: string;
 };
+
+export type MensagemInteresse = {
+  id: string;
+  autorId: string;
+  corpo: string;
+  criadoEm: string;
+};
+
+export type Negociacao = Interesse & {
+  empresaId: string;
+  /** Vazio se o projeto foi despublicado e não está mais visível para a empresa. */
+  donoProjetoId: string;
+  mensagens: MensagemInteresse[];
+};

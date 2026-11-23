@@ -64,6 +64,14 @@ projects   1─N interests (empresa) 1─N interest_messages
 
 Ninguém altera o próprio `role` pela API. As regras são verificadas por `npm run db:verificar`.
 
+## Negociação
+
+A rota compartilhada `/negociacoes/[id]` exige sessão de produtor ou empresa e carrega a proposta e as mensagens por `lib/dados/negociacoes.ts`. A camada de dados verifica a participação além do RLS. A empresa continua acessando sua conversa se o projeto deixar de ser publicado, sem receber os dados privados do projeto.
+
+Somente o produtor dono responde: de `enviada` para `em_negociacao`, `aceita` ou `recusada`; de `em_negociacao` para `aceita` ou `recusada`. A atualização considera o status lido para evitar sobrescrever uma decisão concorrente. O trigger existente também impede que a empresa altere o status pela API.
+
+Os participantes enviam mensagens por Server Actions com validação Zod (texto sem espaços nas pontas, de 1 a 4.000 caracteres). A autoria vem da sessão; o histórico é ordenado por data e ID. As mensagens continuam disponíveis após a resposta. A conversa é atualizada ao enviar ou pelo botão de atualização; não há assinatura Realtime para mensagens. No modo demonstração, a consulta usa dados identificados e as mutações ficam indisponíveis.
+
 ## Limitações conhecidas
 
 - **Chuva da NASA POWER** vem de modelos de satélite e tende a subestimar a precipitação em relação às estações em solo. Serve como leitura regional, não como medição da fazenda.

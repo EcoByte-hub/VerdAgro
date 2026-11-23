@@ -9,6 +9,7 @@
  */
 import { execSync } from 'node:child_process';
 import { verificarIndicadoresAdmin } from './verificar-indicadores-admin.mjs';
+import { verificarNegociacoes } from './verificar-negociacoes.mjs';
 
 const status = JSON.parse(execSync('npx -y supabase@3 status -o json', { encoding: 'utf8' }));
 const API = status.API_URL, KEY = status.PUBLISHABLE_KEY;
@@ -86,6 +87,7 @@ try {
   expect('produtor recusa interesse no projeto dele', (await q(prod, iNi, patch({ status: 'recusada' }))).data?.[0]?.status === 'recusada');
   expect('empresa não desfaz a recusa mudando o status', (await q(emp, iNi, patch({ status: 'enviada' }))).status >= 400);
   expect('empresa apaga o interesse recusado (para mandar outro)', len(await q(emp, iNi, { method: 'DELETE' })) === 1);
+  await verificarNegociacoes({ q, expect, prod, coop, emp, anon: KEY, projetoId: projId, produtorId: PROD, empresaId: EMP });
 } finally {
   // Apagar a propriedade leva junto o projeto, os interesses, as mensagens e a linha do tempo
   if (propId) await q(prod, `properties?id=eq.${propId}`, { method: 'DELETE' });

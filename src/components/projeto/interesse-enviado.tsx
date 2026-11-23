@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { retirarInteresse } from "@/app/(app)/marketplace/[id]/actions";
 import { Card, CardTitle } from "@/components/ui/card";
 import { ConfirmarAcao } from "@/components/ui/confirmar-acao";
@@ -35,8 +36,14 @@ export function InteresseEnviado({ interesse: i }: { interesse: Interesse }) {
           {i.volumeProposto !== null && ` · ${formatNumber(i.volumeProposto)} tCO₂e de referência`}
         </p>
       </div>
-      {estaAberto(i) && (
-        <div className="mt-4 flex flex-wrap justify-end">
+      <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
+        <Link
+          href={`/negociacoes/${i.id}`}
+          className="mr-auto text-sm font-semibold text-musgo underline-offset-4 hover:underline"
+        >
+          Ver negociação e mensagens
+        </Link>
+        {estaAberto(i) && (
           <ConfirmarAcao
             rotulo="Retirar interesse"
             pergunta="Retirar seu interesse? O produtor deixa de ver sua mensagem."
@@ -45,8 +52,8 @@ export function InteresseEnviado({ interesse: i }: { interesse: Interesse }) {
             acao={retirarInteresse.bind(null, i.id)}
             className="hover:bg-erro/10 hover:text-erro"
           />
-        </div>
-      )}
+        )}
+      </div>
     </Card>
   );
 }

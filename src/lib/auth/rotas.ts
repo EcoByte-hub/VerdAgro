@@ -11,6 +11,7 @@ export const HOME_DO_PAPEL: Record<Papel, string> = {
 export const ROTAS_PROTEGIDAS: { prefixo: string; papeis: Papel[] }[] = [
   { prefixo: "/produtor", papeis: ["produtor"] },
   { prefixo: "/empresa", papeis: ["empresa"] },
+  { prefixo: "/negociacoes", papeis: ["produtor", "empresa"] },
   { prefixo: "/marketplace", papeis: ["empresa", "produtor", "admin"] },
   { prefixo: "/admin", papeis: ["admin"] },
 ];

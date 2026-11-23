@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { MapPin } from "lucide-react";
@@ -122,12 +123,20 @@ async function Conteudo({ params }: { params: PageProps<"/marketplace/[id]">["pa
               <Card className="border-mata-900/20">
                 <CardTitle>{recusado ? "Nova proposta" : "Tenho interesse"}</CardTitle>
                 {recusado ? (
-                  <p className="mt-2 mb-4 rounded-2xl bg-areia/50 p-4 text-sm text-tinta">
-                    O produtor recusou sua proposta de{" "}
-                    {new Date(meuInteresse.criadoEm).toLocaleDateString("pt-BR")}. Se quiser, ajuste a
-                    mensagem abaixo e envie de novo: ela substitui a anterior e chega ao produtor como um
-                    interesse novo.
-                  </p>
+                  <div className="mt-2 mb-4 rounded-2xl bg-areia/50 p-4 text-sm text-tinta">
+                    <p>
+                      O produtor recusou sua proposta de{" "}
+                      {new Date(meuInteresse.criadoEm).toLocaleDateString("pt-BR")}. Se quiser, ajuste a
+                      mensagem abaixo e envie de novo: ela substitui a anterior e chega ao produtor como um
+                      interesse novo.
+                    </p>
+                    <Link
+                      href={`/negociacoes/${meuInteresse.id}`}
+                      className="mt-2 inline-block font-semibold text-musgo underline-offset-4 hover:underline"
+                    >
+                      Ver negociação e mensagens anteriores
+                    </Link>
+                  </div>
                 ) : (
                   <p className="mt-1 mb-4 text-sm text-tinta-soft">
                     O produtor recebe sua mensagem no painel dele.

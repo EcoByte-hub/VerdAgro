@@ -39,7 +39,7 @@ async function Conteudo() {
         {interesses.length ? (
           <div className="grid gap-3">
             {interesses.map((i) => (
-              <Link key={i.id} href={`/marketplace/${i.projetoId}`}>
+              <Link key={i.id} href={`/negociacoes/${i.id}`}>
                 <Card className="transition-colors hover:border-mata-900/30">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <CardEyebrow>

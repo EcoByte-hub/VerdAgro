@@ -53,6 +53,7 @@ export async function retirarInteresse(interesseId: string): Promise<{ erro?: st
     if (!retirado) return { erro: "Este interesse não pode mais ser retirado. Atualize a página." };
     revalidatePath("/empresa");
     revalidatePath(`/marketplace/${retirado.projetoId}`);
+    revalidatePath(`/negociacoes/${interesseId}`);
   } catch (e) {
     console.error("[interesses] retirar", e);
     return { erro: "Não foi possível retirar agora. Tente novamente." };

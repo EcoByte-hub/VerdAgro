@@ -62,3 +62,5 @@ async function Conteudo({ params }: { params: PageProps<"/rota/[id]">["params"] 
 
 - Lógica pura (cálculos, clientes de API, schema) tem teste em Vitest ao lado do arquivo: `arquivo.test.ts`.
 - Chamadas externas nos testes são sempre mockadas.
+- Para alterações nos fluxos do MVP, rode também `npm run e2e` com o Chromium instalado. A suíte cobre o roteiro demonstrativo em desktop e celular, sem segredos nem banco.
+- Consulte [Testes E2E](docs/e2e.md) para instalar o navegador, entender os limites do modo demonstração e abrir os relatórios e traces das falhas na CI.

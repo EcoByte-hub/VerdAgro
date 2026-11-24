@@ -1,6 +1,7 @@
 import "server-only";
 
 export { obterIndicadoresAdmin } from "./admin";
+export { obterUltimoDiagnostico, type DiagnosticoSalvo } from "./diagnosticos";
 
 import type { Sessao } from "@/lib/auth/sessao";
 import { INTERESSES_DEMO, PROJETOS_DEMO, PROPRIEDADES_DEMO } from "@/lib/demo/catalogo";
@@ -121,17 +122,22 @@ export async function salvarDiagnostico(
   propriedadeId: string,
   registro: { ndvi: unknown; clima: unknown; resultado: unknown; origem: unknown; modelo: string | null },
 ) {
-  if (sessao.modo === "demo") return;
+  if (sessao.modo === "demo") return null;
   const supabase = await createClient();
-  const { error } = await supabase.from("diagnostics").insert({
-    property_id: propriedadeId,
-    ndvi: registro.ndvi as never,
-    climate: registro.clima as never,
-    result: registro.resultado as never,
-    sources: registro.origem as never,
-    model: registro.modelo,
-  });
+  const { data, error } = await supabase
+    .from("diagnostics")
+    .insert({
+      property_id: propriedadeId,
+      ndvi: registro.ndvi as never,
+      climate: registro.clima as never,
+      result: registro.resultado as never,
+      sources: registro.origem as never,
+      model: registro.modelo,
+    })
+    .select("created_at")
+    .single();
   if (error) throw error;
+  return data.created_at;
 }
 
 // ---------------------------------------------------------------------------

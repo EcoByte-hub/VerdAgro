@@ -2,12 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { AlertTriangle, Check, FileText, Loader2, RotateCcw, Sparkles } from "lucide-react";
-import {
-  executarDiagnostico,
-  type RespostaDiagnostico,
-} from "@/app/(app)/produtor/propriedades/[id]/actions";
+import { executarDiagnostico } from "@/app/(app)/produtor/propriedades/[id]/actions";
 import { Button } from "@/components/ui/button";
 import { Tag } from "@/components/ui/tag";
+import type { DiagnosticoSalvo } from "@/lib/dados/diagnosticos";
 import { AVISO_PRELIMINAR, ROTULO_PRATICA } from "@/lib/diagnostico/schema";
 import { formatNumber } from "@/lib/utils";
 import { GraficoNdvi } from "./grafico-ndvi";
@@ -19,14 +17,32 @@ const ETAPAS = [
   "Interpretando com IA",
 ];
 
-export function PainelDiagnostico({ propriedadeId }: { propriedadeId: string }) {
-  const [resposta, setResposta] = useState<RespostaDiagnostico | null>(null);
+export function PainelDiagnostico({
+  propriedadeId,
+  diagnosticoInicial,
+  erroInicial,
+}: {
+  propriedadeId: string;
+  diagnosticoInicial: DiagnosticoSalvo | null;
+  erroInicial?: string;
+}) {
+  const [diagnostico, setDiagnostico] = useState(diagnosticoInicial);
+  const [erro, setErro] = useState(erroInicial);
   const [pendente, iniciar] = useTransition();
 
   const gerar = () =>
     iniciar(async () => {
-      setResposta(null);
-      setResposta(await executarDiagnostico(propriedadeId));
+      setErro(undefined);
+      try {
+        const resposta = await executarDiagnostico(propriedadeId);
+        if (resposta.ok) {
+          setDiagnostico({ resultado: resposta.resultado, criadoEm: resposta.criadoEm });
+        } else {
+          setErro(resposta.erro);
+        }
+      } catch {
+        setErro("Não foi possível gerar o diagnóstico agora. Tente novamente.");
+      }
     });
 
   return (
@@ -42,16 +58,34 @@ export function PainelDiagnostico({ propriedadeId }: { propriedadeId: string }) 
         <Button onClick={gerar} disabled={pendente} size="sm">
           {pendente ? (
             <Loader2 size={16} className="animate-spin" />
-          ) : resposta?.ok ? (
+          ) : diagnostico ? (
             <RotateCcw size={16} />
           ) : (
             <Sparkles size={16} />
           )}
-          {pendente ? "Analisando..." : resposta?.ok ? "Gerar novamente" : "Gerar diagnóstico"}
+          {pendente ? "Analisando..." : diagnostico ? "Gerar novamente" : "Gerar diagnóstico"}
         </Button>
       </div>
 
       <div className="p-6">
+        {diagnostico && (
+          <p className="mb-4 text-sm text-palha/70">
+            {diagnostico.criadoEm ? (
+              <>
+                Salvo em{" "}
+                <time dateTime={diagnostico.criadoEm}>
+                  {new Date(diagnostico.criadoEm).toLocaleString("pt-BR", {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                    timeZone: "America/Sao_Paulo",
+                  })}
+                </time>
+              </>
+            ) : (
+              "Resultado demonstrativo, não salvo no banco."
+            )}
+          </p>
+        )}
         {pendente && (
           <ul className="space-y-3 py-6">
             {ETAPAS.map((e) => (
@@ -62,25 +96,35 @@ export function PainelDiagnostico({ propriedadeId }: { propriedadeId: string }) 
           </ul>
         )}
 
-        {!pendente && !resposta && (
+        {!pendente && !diagnostico && !erro && (
           <p className="py-8 text-center text-palha/70">
             Cruze satélite, clima e IA para descobrir práticas, oportunidades e o que precisa ser comprovado.
           </p>
         )}
 
-        {!pendente && resposta && !resposta.ok && (
-          <p className="flex items-center gap-2 rounded-xl bg-erro/20 p-4 text-sm">
-            <AlertTriangle size={16} /> {resposta.erro}
-          </p>
+        {!pendente && erro && (
+          <div role="alert" className="mb-4 rounded-xl bg-erro/20 p-4 text-sm">
+            <p className="flex items-start gap-2">
+              <AlertTriangle size={16} className="shrink-0" /> {erro}
+            </p>
+            {erro === erroInicial && (
+              <a
+                href={`/produtor/propriedades/${propriedadeId}`}
+                className="mt-2 inline-block underline underline-offset-4"
+              >
+                Atualizar página
+              </a>
+            )}
+          </div>
         )}
 
-        {!pendente && resposta?.ok && <Resultado r={resposta.resultado} />}
+        {!pendente && diagnostico && <Resultado r={diagnostico.resultado} />}
       </div>
     </section>
   );
 }
 
-function Resultado({ r }: { r: Extract<RespostaDiagnostico, { ok: true }>["resultado"] }) {
+function Resultado({ r }: { r: DiagnosticoSalvo["resultado"] }) {
   const { diagnostico: d, indicadores: ind } = r;
   return (
     <div className="space-y-6">
@@ -88,7 +132,7 @@ function Resultado({ r }: { r: Extract<RespostaDiagnostico, { ok: true }>["resul
         <Tag kind="estimativa" className="border-cerrado-300 text-cerrado-300">
           Estimativa preliminar
         </Tag>
-        <Tag kind="demo" className="text-palha/70">
+        <Tag kind="demo" className="whitespace-normal text-palha/70">
           Satélite: {r.origem.ndvi === "sentinel-2" ? "Sentinel-2" : "demo"} · Clima:{" "}
           {r.origem.clima === "nasa-power" ? "NASA POWER" : "demo"} · IA:{" "}
           {r.origem.ia === "claude" ? "Claude" : "demo"}
@@ -115,7 +159,11 @@ function Resultado({ r }: { r: Extract<RespostaDiagnostico, { ok: true }>["resul
       </div>
 
       <div className="rounded-2xl border border-mata-700 bg-mata-800/60 p-4">
-        <GraficoNdvi serie={r.ndvi} />
+        {r.ndvi ? (
+          <GraficoNdvi serie={r.ndvi} />
+        ) : (
+          <p className="text-sm text-palha/70">Série de NDVI não disponível neste registro.</p>
+        )}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">

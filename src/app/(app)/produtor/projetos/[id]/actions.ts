@@ -6,13 +6,14 @@ import { exigirPapel } from "@/lib/auth/sessao";
 import {
   apagarArquivoEnviado,
   atualizarProjeto,
+  avancarEstagioProjeto,
   definirPublicacao,
   marcarInteresseRecusado,
   obterProjetoDoProdutor,
   registrarDocumento,
   removerDocumento,
 } from "@/lib/dados";
-import { ROTULO_DOCUMENTO, TIPOS_DOCUMENTO } from "@/lib/dados/tipos";
+import { ROTULO_DOCUMENTO, TIPOS_DOCUMENTO, infoEstagio } from "@/lib/dados/tipos";
 import { PRATICAS } from "@/lib/diagnostico/schema";
 import { caminhoValido } from "@/lib/documentos";
 import { formatHectares } from "@/lib/utils";
@@ -227,4 +228,48 @@ export async function recusarInteresse(interesseId: string): Promise<{ erro?: st
     return { erro: "Não foi possível recusar agora. Tente novamente." };
   }
   return undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Avanço de estágio (rastreabilidade)
+// ---------------------------------------------------------------------------
+/** `valores` devolve o que foi digitado, para o formulário não perder o texto quando há erro. */
+export type EstadoAvancoEstagio =
+  { erro?: string; ok?: string; valores?: Record<string, string> } | undefined;
+
+const schemaAvanco = z.object({
+  projetoId: z.uuid("Projeto inválido."),
+  nota: z
+    .string()
+    .trim()
+    .max(500, "Nota: use no máximo 500 caracteres")
+    .transform((v) => v || null),
+});
+
+export async function avancarEstagio(_: EstadoAvancoEstagio, formData: FormData): Promise<EstadoAvancoEstagio> {
+  const sessao = await exigirPapel("produtor");
+
+  const valores = Object.fromEntries(
+    [...formData].filter((par): par is [string, string] => typeof par[1] === "string"),
+  );
+  const dados = schemaAvanco.safeParse(valores);
+  if (!dados.success) return { erro: dados.error.issues[0].message, valores };
+
+  if (sessao.modo === "demo") {
+    return {
+      erro: "No modo demonstração o estágio não muda. Configure o Supabase para avançar na linha do tempo.",
+      valores,
+    };
+  }
+
+  try {
+    // A RPC do banco garante a ordem, o dono e a nota obrigatória nos estágios
+    // de verificação; a mensagem de erro dela é legível e vai direto para a tela.
+    const proximo = await avancarEstagioProjeto(sessao, dados.data.projetoId, dados.data.nota);
+    revalidarProjeto(dados.data.projetoId);
+    return { ok: `Estágio avançou para ${infoEstagio(proximo).rotulo}.` };
+  } catch (e) {
+    console.error("[estágio] avançar", e);
+    return { erro: (e as Error).message, valores };
+  }
 }

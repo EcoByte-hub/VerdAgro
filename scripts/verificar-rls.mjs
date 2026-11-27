@@ -62,6 +62,19 @@ try {
   const etapas = linhas(await q(prod, `project_stage_events?project_id=eq.${projId}&select=stage`));
   expect('linha do tempo registrada', etapas.map(e => e.stage).join(',') === 'cadastro');
   expect('crédito emitido só após o estágio de emissão', (await q(prod, `projects?id=eq.${projId}`, patch({ issued_credits: 100 }))).status >= 400);
+
+  // ---------- avanço de estágio em ordem, com nota na linha do tempo (RPC avancar_estagio)
+  const rpc = (tok, projeto, nota) => q(tok, 'rpc/avancar_estagio', post({ p_projeto: projeto, p_nota: nota }));
+  const avancos = [await rpc(prod, projId, null), await rpc(prod, projId, null)];
+  expect('produtor avança em ordem sem nota até desenvolvimento', avancos.map(r => r.data).join(',') === 'analise_inicial,desenvolvimento');
+  const semNota = await rpc(prod, projId, null);
+  expect('validação exige nota (quem verificou e com qual evidência)', semNota.status >= 400 && /nota/i.test(JSON.stringify(semNota.data)));
+  const comNota = await rpc(prod, projId, 'Validação contratada com organismo X');
+  expect('avança para validação com a nota', comNota.status === 200 && comNota.data === 'validacao');
+  const eventos = linhas(await q(prod, `project_stage_events?project_id=eq.${projId}&select=stage,note&order=created_at`));
+  expect('nota fica no evento da validação na linha do tempo', eventos.at(-1)?.stage === 'validacao' && eventos.at(-1)?.note === 'Validação contratada com organismo X');
+  expect('outro produtor não avança estágio alheio', (await rpc(coop, projId, 'qualquer')).status >= 400);
+  expect('empresa não avança estágio', (await rpc(emp, projId, 'qualquer')).status >= 400);
   const vitrine = await ids(emp, 'marketplace_projects?select=id');
   const publicados = await ids(adm, 'projects?is_published=eq.true&select=id');
   expect('empresa vê no marketplace exatamente os projetos publicados', vitrine.has(projId) && vitrine.size === publicados.size && contem(vitrine, publicados));

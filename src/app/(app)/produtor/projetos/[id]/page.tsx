@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ArrowUpRight, Eye, EyeOff, MapPin } from "lucide-react";
 import { Cabecalho } from "@/components/app/cabecalho";
+import { AvancarEstagio } from "@/components/projeto/avancar-estagio";
 import { BotaoPublicacao } from "@/components/projeto/botao-publicacao";
 import { DadosProjeto } from "@/components/projeto/dados-projeto";
 import { EnviarDocumento } from "@/components/projeto/enviar-documento";
@@ -177,9 +178,10 @@ async function Conteudo({ params }: { params: PageProps<"/produtor/projetos/[id]
             <div className="mt-4">
               <LinhaDoTempo atual={p.estagio} eventos={p.linhaDoTempo} />
             </div>
+            <AvancarEstagio projetoId={p.id} atual={p.estagio} demo={sessao.modo === "demo"} />
             <p className="mt-6 text-xs text-tinta-soft">
-              O estágio avança com a validação e a verificação independentes. Créditos só existem depois da
-              emissão por um registro oficial.
+              O estágio avança em ordem, com a nota registrada na linha do tempo. Créditos só existem
+              depois da emissão por um registro oficial.
             </p>
           </Card>
         </div>

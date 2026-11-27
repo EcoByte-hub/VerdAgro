@@ -423,6 +423,28 @@ export async function definirPublicacao(sessao: Sessao, id: string, publicado: b
   if (error) throw error;
 }
 
+/**
+ * Avança o projeto para o próximo estágio (em ordem fixa), registrando a nota
+ * na linha do tempo. A regra (quem pode avançar e quando a nota é obrigatória)
+ * vive na RPC `avancar_estagio`, que também é exercida pelo `db:verificar`.
+ * A mensagem de erro da RPC é exibida ao produtor no formulário.
+ */
+export async function avancarEstagioProjeto(
+  sessao: Sessao,
+  projetoId: string,
+  nota: string | null,
+): Promise<Estagio> {
+  if (sessao.modo === "demo") return "cadastro"; // demo é somente leitura (a action bloqueia antes)
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("avancar_estagio", {
+    p_projeto: projetoId,
+    p_nota: nota ?? undefined,
+  });
+  if (error) throw error;
+  return data as Estagio;
+}
+
 // ---------------------------------------------------------------------------
 // Interesses (negociação)
 // ---------------------------------------------------------------------------

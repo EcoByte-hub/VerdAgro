@@ -577,6 +577,10 @@ export type Database = {
       };
     };
     Functions: {
+      avancar_estagio: {
+        Args: { p_nota?: string; p_projeto: string };
+        Returns: Database["public"]["Enums"]["project_stage"];
+      };
       current_role_is: { Args: { target: Database["public"]["Enums"]["user_role"] }; Returns: boolean };
       indicadores_admin: {
         Args: Record<PropertyKey, never>;

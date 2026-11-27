@@ -25,6 +25,11 @@ async function Conteudo() {
         eyebrow="Projetos de carbono"
         titulo="Meus projetos"
         descricao="Edite os dados, acompanhe o estágio e escolha o que aparece no marketplace."
+        acoes={
+          <Link href="/produtor/projetos/nova" className={buttonClasses({ size: "sm" })}>
+            <Sprout size={14} /> Novo projeto
+          </Link>
+        }
       />
 
       {projetos.length ? (

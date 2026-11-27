@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { AlertTriangle, Check, FileText, Loader2, RotateCcw, Sparkles } from "lucide-react";
+import { AlertTriangle, Check, FileText, Loader2, Plus, RotateCcw, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { executarDiagnostico } from "@/app/(app)/produtor/propriedades/[id]/actions";
 import { Button } from "@/components/ui/button";
 import { Tag } from "@/components/ui/tag";
@@ -118,13 +119,13 @@ export function PainelDiagnostico({
           </div>
         )}
 
-        {!pendente && diagnostico && <Resultado r={diagnostico.resultado} />}
+        {!pendente && diagnostico && <Resultado r={diagnostico.resultado} propriedadeId={propriedadeId} />}
       </div>
     </section>
   );
 }
 
-function Resultado({ r }: { r: DiagnosticoSalvo["resultado"] }) {
+function Resultado({ r, propriedadeId }: { r: DiagnosticoSalvo["resultado"]; propriedadeId: string }) {
   const { diagnostico: d, indicadores: ind } = r;
   return (
     <div className="space-y-6">
@@ -174,7 +175,16 @@ function Resultado({ r }: { r: DiagnosticoSalvo["resultado"] }) {
         </Bloco>
         <Bloco titulo="Oportunidades de melhoria">
           {d.oportunidades.map((o) => (
-            <Item key={o.titulo} marcador="tracejado" titulo={o.titulo} texto={o.descricao} />
+            <Item
+              key={o.titulo}
+              marcador="tracejado"
+              titulo={o.titulo}
+              texto={o.descricao}
+              acao={{
+                href: `/produtor/projetos/nova?propriedade=${propriedadeId}&pratica=${o.pratica}&titulo=${encodeURIComponent(o.titulo)}`,
+                rotulo: `Criar projeto: ${ROTULO_PRATICA[o.pratica]}`,
+              }}
+            />
           ))}
         </Bloco>
         <Bloco titulo="Documentos necessários">
@@ -227,10 +237,13 @@ function Item({
   marcador,
   titulo,
   texto,
+  acao,
 }: {
   marcador: "solido" | "tracejado" | "doc" | number;
   titulo: string;
   texto?: string;
+  /** chamada para ação ligada ao item (ex.: criar projeto a partir da oportunidade) */
+  acao?: { href: string; rotulo: string };
 }) {
   return (
     <li className="flex gap-3 text-sm">
@@ -249,6 +262,14 @@ function Item({
       <span>
         <span className="text-palha">{titulo}</span>
         {texto && <span className="mt-0.5 block text-palha/60">{texto}</span>}
+        {acao && (
+          <Link
+            href={acao.href}
+            className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-broto underline-offset-4 hover:underline"
+          >
+            <Plus size={12} className="shrink-0" /> {acao.rotulo}
+          </Link>
+        )}
       </span>
     </li>
   );

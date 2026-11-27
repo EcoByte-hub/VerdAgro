@@ -143,6 +143,53 @@ export async function salvarDiagnostico(
 // ---------------------------------------------------------------------------
 // Projetos e marketplace
 // ---------------------------------------------------------------------------
+
+/** Dados do passo 3: cadastro de projeto a partir da propriedade e do diagnóstico. */
+export type NovoProjeto = {
+  propriedadeId: string;
+  titulo: string;
+  descricao: string | null;
+  pratica: Pratica;
+  areaHa: number;
+  objetivo: string | null;
+  inicio: string | null;
+  fim: string | null;
+  metodologia: string | null;
+  infoComercial: string | null;
+  publicado: boolean;
+};
+
+/**
+ * Cria o projeto já no estágio "cadastro" — o trigger `log_project_stage`
+ * registra a primeira entrada da linha do tempo automaticamente.
+ * O RLS confirma o dono e a posse da propriedade; a validação de área fica na action.
+ */
+export async function criarProjeto(sessao: Sessao, novo: NovoProjeto): Promise<string> {
+  if (sessao.modo === "demo") return PROJETOS_DEMO[0].id; // demo é somente leitura
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .insert({
+      property_id: novo.propriedadeId,
+      owner_id: sessao.id,
+      title: novo.titulo,
+      description: novo.descricao,
+      practice: novo.pratica,
+      area_ha: novo.areaHa,
+      objective: novo.objetivo,
+      start_date: novo.inicio,
+      end_date: novo.fim,
+      methodology: novo.metodologia,
+      commercial_info: novo.infoComercial,
+      is_published: novo.publicado,
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+  return data.id;
+}
+
 type LinhaMarketplace = {
   id: string | null;
   title: string | null;

@@ -21,5 +21,5 @@ test("passo 3: formulário de novo projeto com pré-seleção do diagnóstico", 
   // Modo demonstração não grava: o aviso aparece e nenhum 5xx estoura (fixture)
   await page.getByLabel("Área do projeto (ha)", { exact: true }).fill("80");
   await page.getByRole("button", { name: "Criar projeto" }).click();
-  await expect(page.getByText(/modo demonstração/i)).toBeVisible();
+  await expect(page.getByText(/o cadastro não é salvo/i)).toBeVisible();
 });
